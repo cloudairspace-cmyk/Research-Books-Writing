@@ -109,8 +109,8 @@
       window.location.href = 'index.html';
     }
     const roleBadge = document.getElementById('roleBadge');
-    roleBadge.textContent = role === 'author' ? '✍️ Author' : '📋 Reviewer';
-    roleBadge.className = 'role-badge ' + (role === 'author' ? 'role-author' : 'role-reviewer');
+    roleBadge.textContent = (role === 'author' || role === 'Emma') ? '✍️ Emma' : '📋 CEO';
+    roleBadge.className = 'role-badge ' + ((role === 'author' || role === 'Emma') ? 'role-author' : 'role-reviewer');
 
     // ---- Get Book ID ----
     const urlParams = new URLSearchParams(window.location.search);
@@ -249,14 +249,14 @@
       list.innerHTML = comments.map(c => `
         <div class="comment-thread" style="${c.resolved ? 'opacity:0.5;' : ''}">
           ${c.paragraphText ? `<div class="quoted-text">"${c.paragraphText.substring(0, 80)}..."</div>` : ''}
-          <div class="comment-bubble ${c.role === 'reviewer' ? 'reviewer-comment' : 'author-comment'}">
-            <strong style="font-size:0.78rem;color:${c.role === 'reviewer' ? 'var(--blue)' : 'var(--gold)'};">${c.role === 'reviewer' ? '📋 Reviewer' : '✍️ Author'}</strong>
+          <div class="comment-bubble ${(c.role === 'reviewer' || c.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}">
+            <strong style="font-size:0.78rem;color:${(c.role === 'reviewer' || c.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(c.role === 'reviewer' || c.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
             <p style="margin:6px 0 0;font-size:0.88rem;">${escapeHtml(c.text)}</p>
             <div class="comment-meta">${formatDate(c.timestamp)}</div>
           </div>
           ${(c.replies || []).map(r => `
-            <div class="comment-bubble ${r.role === 'reviewer' ? 'reviewer-comment' : 'author-comment'}" style="margin-left:16px;">
-              <strong style="font-size:0.78rem;color:${r.role === 'reviewer' ? 'var(--blue)' : 'var(--gold)'};">${r.role === 'reviewer' ? '📋 Reviewer' : '✍️ Author'}</strong>
+            <div class="comment-bubble ${(r.role === 'reviewer' || r.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}" style="margin-left:16px;">
+              <strong style="font-size:0.78rem;color:${(r.role === 'reviewer' || r.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(r.role === 'reviewer' || r.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
               <p style="margin:6px 0 0;font-size:0.85rem;">${escapeHtml(r.text)}</p>
               <div class="comment-meta">${formatDate(r.timestamp)}</div>
             </div>
@@ -479,8 +479,8 @@
 
       list.innerHTML = notes.map(n => `
         <div class="voice-note-item">
-          <span style="font-size:0.75rem;color:${n.role === 'reviewer' ? 'var(--blue)' : 'var(--gold)'};">
-            ${n.role === 'reviewer' ? '📋' : '✍️'}
+          <span style="font-size:0.75rem;color:${(n.role === 'reviewer' || n.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">
+            ${(n.role === 'reviewer' || n.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}
           </span>
           <audio controls src="${n.audioData}" style="flex:1;height:32px;"></audio>
           <span style="font-size:0.7rem;color:var(--gray-500);">${Math.floor(n.duration / 60)}:${String(n.duration % 60).padStart(2, '0')}</span>

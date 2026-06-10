@@ -85,9 +85,9 @@
 
     // ---- Setup UI ----
     const roleBadge = document.getElementById('roleBadge');
-    roleBadge.textContent = role === 'author' ? '✍️ Author' : '📋 Reviewer';
-    roleBadge.className = 'role-badge ' + (role === 'author' ? 'role-author' : 'role-reviewer');
-    document.getElementById('welcomeMsg').textContent = role === 'author' ? 'Welcome, Author' : 'Welcome, Reviewer';
+    roleBadge.textContent = (role === 'author' || role === 'Emma') ? '✍️ Emma' : '📋 CEO';
+    roleBadge.className = 'role-badge ' + ((role === 'author' || role === 'Emma') ? 'role-author' : 'role-reviewer');
+    document.getElementById('welcomeMsg').textContent = (role === 'author' || role === 'Emma') ? 'Welcome, Emma' : 'Welcome, CEO';
 
     function logout() {
       sessionStorage.clear();
