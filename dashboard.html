@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Homers Research Consult</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="youtube logo.png" alt="HRC" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+      <div>
+        <h2>Homers Research Consult</h2>
+        <span>Book Review Platform</span>
+      </div>
+    </div>
+    <div class="navbar-actions">
+      <span class="role-badge" id="roleBadge"></span>
+      <button class="btn btn-sm btn-secondary" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Dashboard -->
+  <div class="dashboard">
+    <div class="dashboard-header fade-in">
+      <h1 id="welcomeMsg">Welcome back</h1>
+      <p>Manage and review the research book series</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row fade-in fade-in-delay-1">
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--blue);" id="statTotal">10</div>
+        <div class="stat-label">Total Books</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--orange);" id="statReview">0</div>
+        <div class="stat-label">In Review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--red);" id="statRevision">0</div>
+        <div class="stat-label">Needs Revision</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--green);" id="statApproved">0</div>
+        <div class="stat-label">Approved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--gold);" id="statComments">0</div>
+        <div class="stat-label">Open Comments</div>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;" class="fade-in fade-in-delay-2">
+      <button class="btn btn-sm filter-btn active" data-filter="all" onclick="filterBooks('all', this)">All Books</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="draft" onclick="filterBooks('draft', this)">Drafts</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="in-review" onclick="filterBooks('in-review', this)">In Review</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="revision" onclick="filterBooks('revision', this)">Revision</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="approved" onclick="filterBooks('approved', this)">Approved</button>
+    </div>
+
+    <!-- Books Grid -->
+    <div class="books-grid" id="booksGrid"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/books-data.js"></script>
+  <script>
+    // ---- Auth Check ----
+    const role = sessionStorage.getItem('hrc_role');
+    if (!role || sessionStorage.getItem('hrc_loggedIn') !== 'true') {
+      window.location.href = 'index.html';
+    }
+
+    // ---- Setup UI ----
+    const roleBadge = document.getElementById('roleBadge');
+    roleBadge.textContent = role === 'author' ? '✍️ Author' : '📋 Reviewer';
+    roleBadge.className = 'role-badge ' + (role === 'author' ? 'role-author' : 'role-reviewer');
+    document.getElementById('welcomeMsg').textContent = role === 'author' ? 'Welcome, Author' : 'Welcome, Reviewer';
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    }
+
+    // ---- Initialize Books in DB ----
+    function initBooks() {
+      let stored = DB.getBooks();
+      if (!stored || stored.length === 0) {
+        DB.setBooks(BOOKS_DATA);
+        stored = BOOKS_DATA;
+      }
+      return stored;
+    }
+
+    // ---- Render Books ----
+    function renderBooks(filter = 'all') {
+      const books = initBooks();
+      const grid = document.getElementById('booksGrid');
+      grid.innerHTML = '';
+
+      const filtered = filter === 'all' ? books : books.filter(b => b.status === filter);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<p style="color:var(--gray-400);grid-column:1/-1;text-align:center;padding:60px 0;">No books found with this status.</p>';
+        return;
+      }
+
+      filtered.forEach((book, i) => {
+        const comments = DB.getAllBookComments(book.id);
+        const openComments = comments.filter(c => !c.resolved).length;
+        const statusClass = book.status === 'in-review' ? 'review' : book.status;
+        const statusLabel = book.status === 'in-review' ? 'In Review' : book.status.charAt(0).toUpperCase() + book.status.slice(1);
+        const updated = book.lastUpdated ? new Date(book.lastUpdated).toLocaleDateString() : 'Not started';
+        const cardType = book.type.toLowerCase().includes('business') ? 'business' : 'academic';
+
+        const card = document.createElement('div');
+        card.className = `book-card fade-in`;
+        card.dataset.type = cardType;
+        card.style.animationDelay = `${i * 0.06}s`;
+        card.onclick = () => window.location.href = `reader.html?book=${book.id}`;
+
+        card.innerHTML = `
+          <div class="book-card-accent"></div>
+          <div class="book-card-body">
+            <div class="book-number">${String(book.number).padStart(2, '0')}</div>
+            <div class="book-type">${book.type}</div>
+            <h3>${book.title}</h3>
+            <p class="book-desc">${book.description}</p>
+            <div class="book-meta">
+              <span class="badge badge-${statusClass}">${statusLabel}</span>
+              <span class="chapter-count">${book.chapters} chapters</span>
+            </div>
+            ${openComments > 0 ? `<div style="margin-top:12px;font-size:0.8rem;color:var(--orange);">💬 ${openComments} open comment${openComments > 1 ? 's' : ''}</div>` : ''}
+            <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Updated: ${updated}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      updateStats(books);
+    }
+
+    function updateStats(books) {
+      document.getElementById('statTotal').textContent = books.length;
+      document.getElementById('statReview').textContent = books.filter(b => b.status === 'in-review').length;
+      document.getElementById('statRevision').textContent = books.filter(b => b.status === 'revision').length;
+      document.getElementById('statApproved').textContent = books.filter(b => b.status === 'approved').length;
+
+      let totalOpen = 0;
+      books.forEach(b => {
+        const c = DB.getAllBookComments(b.id);
+        totalOpen += c.filter(x => !x.resolved).length;
+      });
+      document.getElementById('statComments').textContent = totalOpen;
+    }
+
+    function filterBooks(filter, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.className = 'btn btn-sm btn-secondary filter-btn';
+        b.style.background = '';
+        b.style.color = '';
+        b.style.border = '';
+      });
+      btn.className = 'btn btn-sm filter-btn active';
+      renderBooks(filter);
+    }
+
+    // ---- Init ----
+    renderBooks();
+  </script>
+</body>
+</html>

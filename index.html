@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Homers Research Consult - Book Review Platform">
+  <title>Homers Research Consult | Book Review Platform</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card glass">
+      <img src="youtube logo.png" alt="Homer's Research Consult" style="width:72px;height:72px;margin:0 auto 18px;display:block;border-radius:50%;object-fit:cover;">
+      <h1>Homers Research Consult</h1>
+      <p class="subtitle">Book Review Platform</p>
+      
+      <form id="loginForm" onsubmit="return false;">
+        <div class="input-group">
+          <label for="password">Enter your access password</label>
+          <input type="password" id="password" placeholder="••••••••••" autocomplete="off" autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+        <p class="login-error" id="loginError">Invalid password. Please try again.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Simple auth
+    const CREDENTIALS = {
+      'HRC@Emmanuel': 'author',
+      'HRC@CEO': 'reviewer'
+    };
+
+    document.getElementById('loginForm').addEventListener('submit', function() {
+      const pw = document.getElementById('password').value.trim();
+      const role = CREDENTIALS[pw];
+      if (role) {
+        sessionStorage.setItem('hrc_role', role);
+        sessionStorage.setItem('hrc_loggedIn', 'true');
+        window.location.href = 'dashboard.html';
+      } else {
+        document.getElementById('loginError').classList.add('show');
+        document.getElementById('password').value = '';
+        setTimeout(() => document.getElementById('loginError').classList.remove('show'), 3000);
+      }
+    });
+
+    // Redirect if already logged in
+    if (sessionStorage.getItem('hrc_loggedIn') === 'true') {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

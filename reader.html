@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Reader | Homers Research Consult</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;color:#fff;text-decoration:none;">
+        <span style="font-size:20px;">←</span>
+        <img src="youtube logo.png" alt="HRC" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+      </a>
+      <div>
+        <h2 id="bookTitle" style="font-size:1rem;color:#fff;">Loading...</h2>
+        <span id="bookStatus" class="badge badge-draft" style="font-size:0.65rem;">Draft</span>
+      </div>
+    </div>
+    <div class="navbar-actions">
+      <select id="statusSelect" class="btn btn-sm btn-secondary" style="cursor:pointer;appearance:auto;padding:6px 12px;" onchange="changeStatus(this.value)">
+        <option value="draft">📝 Draft</option>
+        <option value="in-review">🔍 In Review</option>
+        <option value="revision">🔄 Needs Revision</option>
+        <option value="approved">✅ Approved</option>
+      </select>
+      <button class="btn btn-sm btn-secondary" onclick="toggleComments()">💬 Comments</button>
+      <button class="btn btn-sm btn-secondary" onclick="showVersions()">📋 Versions</button>
+      <span class="role-badge" id="roleBadge"></span>
+    </div>
+  </nav>
+
+  <!-- Reader Layout -->
+  <div class="reader-layout">
+
+    <!-- Chapter Sidebar -->
+    <div class="chapter-sidebar" id="chapterSidebar">
+      <h3>Chapters</h3>
+      <ul class="chapter-list" id="chapterList"></ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="reader-main" id="readerContent">
+      <div style="text-align:center;padding:100px 0;color:var(--gray-400);">
+        <p style="font-size:3rem;margin-bottom:16px;">📖</p>
+        <p>Select a chapter to begin reading</p>
+      </div>
+    </div>
+
+    <!-- Comments Panel -->
+    <div class="comments-panel" id="commentsPanel">
+      <div class="comments-header">
+        <h3>💬 Comments <span id="commentCount" style="color:var(--orange);font-size:0.85rem;"></span></h3>
+        <button class="btn-icon" onclick="toggleComments()" style="width:28px;height:28px;font-size:12px;">✕</button>
+      </div>
+      <div id="commentsList" style="flex:1;overflow-y:auto;"></div>
+      <div class="comment-input-area" id="commentInputArea">
+        <textarea id="commentText" placeholder="Write your comment..." rows="3"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-sm btn-primary" onclick="submitComment()" style="flex:1;">Post Comment</button>
+          <button class="btn btn-sm btn-secondary" id="voiceCommentBtn" onclick="toggleVoicePanel()" title="Voice note">🎤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voice Recorder -->
+  <div class="voice-recorder" id="voiceRecorder">
+    <div class="voice-panel" id="voicePanel">
+      <button class="voice-panel-close" onclick="closeVoicePanel()" title="Close">✕</button>
+      <h3 style="font-size:0.9rem;margin-bottom:8px;">🎤 Voice Note</h3>
+      <div class="voice-timer" id="voiceTimer">00:00</div>
+      <div class="voice-controls">
+        <button class="btn btn-sm btn-primary" id="recordBtn" onclick="toggleRecording()">Start Recording</button>
+        <button class="btn btn-sm btn-secondary" id="stopBtn" onclick="stopAndSave()" style="display:none;">Save</button>
+      </div>
+      <div id="voiceNotesList" style="margin-top:12px;max-height:150px;overflow-y:auto;"></div>
+    </div>
+    <button class="voice-btn" id="voiceMainBtn" onclick="toggleVoicePanel()">🎤</button>
+  </div>
+
+  <!-- Version Modal -->
+  <div class="modal-overlay" id="versionModal">
+    <div class="modal">
+      <h2>📋 Version History</h2>
+      <div id="versionList" class="version-timeline"></div>
+      <div class="modal-actions">
+        <button class="btn btn-sm btn-secondary" onclick="addVersion()">+ Add Version Note</button>
+        <button class="btn btn-sm btn-primary" onclick="closeVersions()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/books-data.js"></script>
+  <script>
+    // ---- Auth ----
+    const role = sessionStorage.getItem('hrc_role');
+    if (!role || sessionStorage.getItem('hrc_loggedIn') !== 'true') {
+      window.location.href = 'index.html';
+    }
+    const roleBadge = document.getElementById('roleBadge');
+    roleBadge.textContent = role === 'author' ? '✍️ Author' : '📋 Reviewer';
+    roleBadge.className = 'role-badge ' + (role === 'author' ? 'role-author' : 'role-reviewer');
+
+    // ---- Get Book ID ----
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookId = urlParams.get('book');
+    if (!bookId) window.location.href = 'dashboard.html';
+
+    let currentChapter = null;
+    let bookChapters = [];
+
+    // ---- Load Book ----
+    async function loadBook() {
+      const books = DB.getBooks().length ? DB.getBooks() : BOOKS_DATA;
+      const bookMeta = books.find(b => b.id === bookId);
+      if (!bookMeta) { window.location.href = 'dashboard.html'; return; }
+
+      document.getElementById('bookTitle').textContent = bookMeta.title;
+      document.title = bookMeta.title + ' | Homers Research Consult';
+
+      const statusClass = bookMeta.status === 'in-review' ? 'review' : bookMeta.status;
+      const statusEl = document.getElementById('bookStatus');
+      statusEl.textContent = bookMeta.status === 'in-review' ? 'In Review' : bookMeta.status.charAt(0).toUpperCase() + bookMeta.status.slice(1);
+      statusEl.className = 'badge badge-' + statusClass;
+      document.getElementById('statusSelect').value = bookMeta.status;
+
+      // Try loading book JSON
+      try {
+        const resp = await fetch(`books/${bookId}.json`);
+        if (resp.ok) {
+          const data = await resp.json();
+          bookChapters = data.chapters || [];
+          renderChapterList();
+          if (bookChapters.length > 0) selectChapter(0);
+        } else {
+          showPlaceholder();
+        }
+      } catch (e) {
+        showPlaceholder();
+      }
+    }
+
+    function showPlaceholder() {
+      // Generate placeholder chapters
+      const bookMeta = (DB.getBooks().length ? DB.getBooks() : BOOKS_DATA).find(b => b.id === bookId);
+      const count = bookMeta ? bookMeta.chapters : 10;
+      bookChapters = [];
+      for (let i = 0; i < count; i++) {
+        bookChapters.push({
+          id: `ch-${String(i + 1).padStart(2, '0')}`,
+          title: `Chapter ${i + 1}`,
+          content: `<p style="color:var(--gray-500);text-align:center;padding:80px 0;">📝 This chapter has not been written yet.<br>Content will appear here once the author publishes it.</p>`
+        });
+      }
+      renderChapterList();
+      selectChapter(0);
+    }
+
+    // ---- Chapter List ----
+    function renderChapterList() {
+      const list = document.getElementById('chapterList');
+      list.innerHTML = '';
+      bookChapters.forEach((ch, i) => {
+        const status = DB.getChapterStatus(bookId, ch.id);
+        const comments = DB.getComments(bookId, ch.id).filter(c => !c.resolved);
+        const li = document.createElement('li');
+        li.className = 'chapter-item' + (i === 0 ? ' active' : '');
+        li.onclick = () => selectChapter(i);
+        li.innerHTML = `
+          <span class="ch-status ${status}"></span>
+          <span style="flex:1">${ch.title}</span>
+          ${comments.length > 0 ? `<span style="font-size:0.7rem;color:var(--orange);">${comments.length}</span>` : ''}
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // ---- Select Chapter ----
+    function selectChapter(index) {
+      currentChapter = index;
+      const ch = bookChapters[index];
+
+      // Update active state
+      document.querySelectorAll('.chapter-item').forEach((el, i) => {
+        el.className = 'chapter-item' + (i === index ? ' active' : '');
+      });
+
+      // Render content with commentable paragraphs
+      const content = document.getElementById('readerContent');
+      let html = ch.content;
+
+      // Wrap paragraphs in commentable divs
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = html;
+      let finalHtml = '';
+      let pIndex = 0;
+
+      wrapper.childNodes.forEach(node => {
+        if (node.nodeType === 1) {
+          const tag = node.tagName.toLowerCase();
+          if (['p', 'blockquote', 'ul', 'ol', 'table'].includes(tag)) {
+            const comments = DB.getComments(bookId, ch.id).filter(c => c.paragraphIndex === pIndex && !c.resolved);
+            const hasComments = comments.length > 0;
+            finalHtml += `<div class="commentable ${hasComments ? 'has-comments' : ''}" data-p="${pIndex}">
+              ${node.outerHTML}
+              <button class="comment-trigger" onclick="openCommentFor(${pIndex})" title="Add comment">
+                💬
+                ${hasComments ? `<span class="comment-count-badge">${comments.length}</span>` : ''}
+              </button>
+            </div>`;
+            pIndex++;
+          } else {
+            finalHtml += node.outerHTML;
+          }
+        }
+      });
+
+      content.innerHTML = finalHtml || html;
+      content.scrollTop = 0;
+      loadComments();
+      loadVoiceNotes();
+    }
+
+    // ---- Comments ----
+    function loadComments() {
+      if (!bookChapters[currentChapter]) return;
+      const ch = bookChapters[currentChapter];
+      const comments = DB.getComments(bookId, ch.id);
+      const openCount = comments.filter(c => !c.resolved).length;
+      document.getElementById('commentCount').textContent = openCount > 0 ? `(${openCount})` : '';
+
+      const list = document.getElementById('commentsList');
+      if (comments.length === 0) {
+        list.innerHTML = '<p style="padding:40px 20px;text-align:center;color:var(--gray-500);font-size:0.85rem;">No comments on this chapter yet.</p>';
+        return;
+      }
+
+      list.innerHTML = comments.map(c => `
+        <div class="comment-thread" style="${c.resolved ? 'opacity:0.5;' : ''}">
+          ${c.paragraphText ? `<div class="quoted-text">"${c.paragraphText.substring(0, 80)}..."</div>` : ''}
+          <div class="comment-bubble ${c.role === 'reviewer' ? 'reviewer-comment' : 'author-comment'}">
+            <strong style="font-size:0.78rem;color:${c.role === 'reviewer' ? 'var(--blue)' : 'var(--gold)'};">${c.role === 'reviewer' ? '📋 Reviewer' : '✍️ Author'}</strong>
+            <p style="margin:6px 0 0;font-size:0.88rem;">${escapeHtml(c.text)}</p>
+            <div class="comment-meta">${formatDate(c.timestamp)}</div>
+          </div>
+          ${(c.replies || []).map(r => `
+            <div class="comment-bubble ${r.role === 'reviewer' ? 'reviewer-comment' : 'author-comment'}" style="margin-left:16px;">
+              <strong style="font-size:0.78rem;color:${r.role === 'reviewer' ? 'var(--blue)' : 'var(--gold)'};">${r.role === 'reviewer' ? '📋 Reviewer' : '✍️ Author'}</strong>
+              <p style="margin:6px 0 0;font-size:0.85rem;">${escapeHtml(r.text)}</p>
+              <div class="comment-meta">${formatDate(r.timestamp)}</div>
+            </div>
+          `).join('')}
+          <div class="comment-actions">
+            ${!c.resolved ? `<button class="resolve-btn" onclick="resolveComment('${c.id}')">✓ Resolve</button>` : '<span style="font-size:0.75rem;color:var(--green);">✓ Resolved</span>'}
+            <button class="resolve-btn" style="background:var(--blue-bg);color:var(--blue);" onclick="replyToComment('${c.id}')">Reply</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openCommentFor(pIndex) {
+      const panel = document.getElementById('commentsPanel');
+      panel.classList.remove('hidden');
+      document.getElementById('commentText').focus();
+      document.getElementById('commentText').dataset.paragraphIndex = pIndex;
+
+      // Get paragraph text for context
+      const commentable = document.querySelector(`[data-p="${pIndex}"]`);
+      if (commentable) {
+        document.getElementById('commentText').dataset.paragraphText = commentable.textContent.trim();
+      }
+    }
+
+    function submitComment() {
+      const textEl = document.getElementById('commentText');
+      const text = textEl.value.trim();
+      if (!text) return;
+
+      const ch = bookChapters[currentChapter];
+      DB.addComment(bookId, ch.id, {
+        text,
+        role,
+        paragraphIndex: parseInt(textEl.dataset.paragraphIndex) || 0,
+        paragraphText: textEl.dataset.paragraphText || '',
+        resolved: false
+      });
+
+      textEl.value = '';
+      textEl.dataset.paragraphIndex = '';
+      textEl.dataset.paragraphText = '';
+      selectChapter(currentChapter);
+      showToast('Comment posted', 'success');
+    }
+
+    function resolveComment(commentId) {
+      const ch = bookChapters[currentChapter];
+      DB.resolveComment(bookId, ch.id, commentId);
+      selectChapter(currentChapter);
+      showToast('Comment resolved', 'success');
+    }
+
+    function replyToComment(commentId) {
+      const replyText = prompt('Your reply:');
+      if (!replyText) return;
+      const ch = bookChapters[currentChapter];
+      DB.addReply(bookId, ch.id, commentId, { text: replyText, role });
+      loadComments();
+      showToast('Reply posted', 'success');
+    }
+
+    function toggleComments() {
+      document.getElementById('commentsPanel').classList.toggle('hidden');
+    }
+
+    // ---- Status ----
+    function changeStatus(newStatus) {
+      DB.updateBookStatus(bookId, newStatus);
+      const statusClass = newStatus === 'in-review' ? 'review' : newStatus;
+      const statusEl = document.getElementById('bookStatus');
+      statusEl.textContent = newStatus === 'in-review' ? 'In Review' : newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+      statusEl.className = 'badge badge-' + statusClass;
+      showToast('Status updated to ' + newStatus, 'success');
+    }
+
+    // ---- Versions ----
+    function showVersions() {
+      document.getElementById('versionModal').classList.add('show');
+      const versions = DB.getVersions(bookId);
+      const list = document.getElementById('versionList');
+      if (versions.length === 0) {
+        list.innerHTML = '<p style="color:var(--gray-500);text-align:center;padding:20px;">No versions recorded yet.</p>';
+        return;
+      }
+      list.innerHTML = versions.map(v => `
+        <div class="version-item">
+          <div class="version-dot"></div>
+          <div class="version-info">
+            <h4>Version ${v.number}</h4>
+            <p>${v.notes || 'No notes'}</p>
+            <p style="font-size:0.72rem;color:var(--gray-500);">${formatDate(v.timestamp)}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addVersion() {
+      const notes = prompt('Version notes (what changed?):');
+      if (!notes) return;
+      DB.addVersion(bookId, { notes });
+      showVersions();
+      showToast('Version recorded', 'success');
+    }
+
+    function closeVersions() {
+      document.getElementById('versionModal').classList.remove('show');
+    }
+
+    // ---- Voice Recording ----
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingTimer = null;
+    let recordingSeconds = 0;
+
+    function toggleVoicePanel() {
+      document.getElementById('voicePanel').classList.toggle('show');
+    }
+
+    function closeVoicePanel() {
+      document.getElementById('voicePanel').classList.remove('show');
+    }
+
+    async function toggleRecording() {
+      const btn = document.getElementById('recordBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const mainBtn = document.getElementById('voiceMainBtn');
+
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+          mediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            clearInterval(recordingTimer);
+          };
+
+          mediaRecorder.start();
+          recordingSeconds = 0;
+          recordingTimer = setInterval(() => {
+            recordingSeconds++;
+            const m = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+            const s = String(recordingSeconds % 60).padStart(2, '0');
+            document.getElementById('voiceTimer').textContent = m + ':' + s;
+          }, 1000);
+
+          btn.textContent = '⏸ Pause';
+          btn.style.background = 'var(--red)';
+          btn.style.color = 'white';
+          stopBtn.style.display = 'inline-flex';
+          mainBtn.classList.add('recording');
+        } catch (e) {
+          showToast('Microphone access denied', 'error');
+        }
+      } else if (mediaRecorder.state === 'recording') {
+        mediaRecorder.pause();
+        btn.textContent = '▶ Resume';
+        btn.style.background = '';
+        btn.style.color = '';
+        clearInterval(recordingTimer);
+      } else if (mediaRecorder.state === 'paused') {
+        mediaRecorder.resume();
+        btn.textContent = '⏸ Pause';
+        btn.style.background = 'var(--red)';
+        btn.style.color = 'white';
+        recordingTimer = setInterval(() => {
+          recordingSeconds++;
+          const m = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+          const s = String(recordingSeconds % 60).padStart(2, '0');
+          document.getElementById('voiceTimer').textContent = m + ':' + s;
+        }, 1000);
+      }
+    }
+
+    function stopAndSave() {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+
+      mediaRecorder.stop();
+      document.getElementById('voiceMainBtn').classList.remove('recording');
+
+      setTimeout(() => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        const ch = bookChapters[currentChapter];
+
+        // Convert to base64 for storage
+        const reader = new FileReader();
+        reader.onload = () => {
+          DB.addVoiceNote(bookId, ch.id, {
+            audioData: reader.result,
+            duration: recordingSeconds,
+            role
+          });
+          loadVoiceNotes();
+          showToast('Voice note saved', 'success');
+        };
+        reader.readAsDataURL(blob);
+
+        // Reset UI and close panel
+        document.getElementById('recordBtn').textContent = 'Start Recording';
+        document.getElementById('recordBtn').style.background = '';
+        document.getElementById('recordBtn').style.color = '';
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('voiceTimer').textContent = '00:00';
+        recordingSeconds = 0;
+
+        // Auto-close voice panel after saving
+        setTimeout(() => closeVoicePanel(), 1500);
+      }, 200);
+    }
+
+    function loadVoiceNotes() {
+      if (!bookChapters[currentChapter]) return;
+      const ch = bookChapters[currentChapter];
+      const notes = DB.getVoiceNotes(bookId, ch.id);
+      const list = document.getElementById('voiceNotesList');
+
+      list.innerHTML = notes.map(n => `
+        <div class="voice-note-item">
+          <span style="font-size:0.75rem;color:${n.role === 'reviewer' ? 'var(--blue)' : 'var(--gold)'};">
+            ${n.role === 'reviewer' ? '📋' : '✍️'}
+          </span>
+          <audio controls src="${n.audioData}" style="flex:1;height:32px;"></audio>
+          <span style="font-size:0.7rem;color:var(--gray-500);">${Math.floor(n.duration / 60)}:${String(n.duration % 60).padStart(2, '0')}</span>
+        </div>
+      `).join('');
+    }
+
+    // ---- Utilities ----
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ---- Init ----
+    loadBook();
+  </script>
+</body>
+</html>
