@@ -5,6 +5,161 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Reader | Homers Research Consult</title>
   <link rel="stylesheet" href="css/main.css">
+  <style>
+    /* WhatsApp Chat Styles */
+    #commentsPanel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: #efeae2;
+      position: relative;
+    }
+    
+    #commentsList {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+      background-repeat: repeat;
+    }
+    
+    .chat-row {
+      display: flex;
+      width: 100%;
+      margin: 2px 0;
+    }
+    
+    .chat-row.outgoing {
+      justify-content: flex-end;
+    }
+    
+    .chat-row.incoming {
+      justify-content: flex-start;
+    }
+    
+    .chat-bubble {
+      max-width: 85%;
+      padding: 8px 12px 6px;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 1px 1.5px rgba(0,0,0,0.12);
+      font-size: 0.88rem;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-row.outgoing .chat-bubble {
+      background: #d9fdd3;
+      color: #111b21;
+      border-top-right-radius: 0;
+    }
+    
+    .chat-row.incoming .chat-bubble {
+      background: #ffffff;
+      color: #111b21;
+      border-top-left-radius: 0;
+    }
+    
+    .chat-sender-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+    
+    .chat-row.outgoing .chat-sender-name {
+      color: #008069;
+    }
+    
+    .chat-row.incoming .chat-sender-name {
+      color: var(--blue);
+    }
+    
+    .chat-quote {
+      background: rgba(0, 0, 0, 0.05);
+      border-left: 3px solid var(--gold);
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .chat-time {
+      font-size: 0.65rem;
+      color: #667781;
+      align-self: flex-end;
+      margin-top: 4px;
+    }
+    
+    /* Input Area */
+    .chat-input-container {
+      background: #f0f2f5;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .chat-input-field {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid #e1e9eb;
+      border-radius: 20px;
+      padding: 9px 15px;
+      font-size: 0.88rem;
+      color: #111b21;
+      outline: none;
+      font-family: var(--font-body);
+    }
+    
+    .chat-action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.25rem;
+      color: #54656f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    
+    .chat-action-btn:hover {
+      color: #111b21;
+      transform: scale(1.05);
+    }
+    
+    .chat-send-btn {
+      background: #008069;
+      color: #ffffff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    }
+    
+    .chat-send-btn:hover {
+      background: #006e5a;
+      transform: scale(1.05);
+    }
+  </style>
 </head>
 <body>
 
@@ -28,7 +183,7 @@
         <option value="approved">✅ Approved</option>
       </select>
       <button class="btn btn-sm btn-secondary" onclick="toggleComments()">💬 Comments</button>
-      <button class="btn btn-sm btn-secondary" onclick="showVersions()">📋 Versions</button>
+      <button class="btn btn-sm btn-secondary" onclick="showVersions()" style="display:none;">📋 Versions</button>
       <span class="role-badge" id="roleBadge"></span>
     </div>
   </nav>
@@ -52,17 +207,29 @@
 
     <!-- Comments Panel -->
     <div class="comments-panel" id="commentsPanel">
-      <div class="comments-header">
-        <h3>💬 Comments <span id="commentCount" style="color:var(--orange);font-size:0.85rem;"></span></h3>
-        <button class="btn-icon" onclick="toggleComments()" style="width:28px;height:28px;font-size:12px;">✕</button>
-      </div>
-      <div id="commentsList" style="flex:1;overflow-y:auto;"></div>
-      <div class="comment-input-area" id="commentInputArea">
-        <textarea id="commentText" placeholder="Write your comment..." rows="3"></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn btn-sm btn-primary" onclick="submitComment()" style="flex:1;">Post Comment</button>
-          <button class="btn btn-sm btn-secondary" id="voiceCommentBtn" onclick="toggleVoicePanel()" title="Voice note">🎤</button>
+      <div class="comments-header" style="background:#075e54;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem;">💬</div>
+          <div>
+            <h3 style="font-size:0.88rem;color:#fff;font-family:var(--font-body);margin:0;font-weight:600;">Review Chat</h3>
+            <span style="font-size:0.68rem;color:rgba(255,255,255,0.7);display:block;margin-top:1px;">Emma & CEO</span>
+          </div>
         </div>
+        <button class="btn-icon" onclick="toggleComments()" style="width:28px;height:28px;font-size:12px;background:none;border:none;color:#fff;">✕</button>
+      </div>
+      
+      <div id="commentsList"></div>
+      
+      <!-- Quote Reply Preview -->
+      <div id="replyPreviewBar" style="background:rgba(0,0,0,0.03);border-left:3px solid var(--gold);padding:6px 12px;font-size:0.75rem;display:none;align-items:center;justify-content:space-between;border-top:1px solid var(--border);">
+        <div id="replyPreviewText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;font-style:italic;color:var(--text-secondary);">Replying to paragraph...</div>
+        <button onclick="clearReplyQuote()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-muted);padding-left:8px;">✕</button>
+      </div>
+      
+      <div class="chat-input-container">
+        <button class="chat-action-btn" id="voiceCommentBtn" onclick="toggleVoicePanel()" title="Voice note">🎤</button>
+        <input type="text" id="commentText" placeholder="Type a message..." class="chat-input-field" onkeydown="handleChatKey(event)">
+        <button class="chat-send-btn" onclick="submitComment()" title="Send">✈️</button>
       </div>
     </div>
   </div>
@@ -240,66 +407,78 @@
       const voiceNotes = DB.getVoiceNotes(bookId, ch.id).map(vn => ({ ...vn, isVoice: true }));
       const allItems = [...comments, ...voiceNotes].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-      const openCount = comments.filter(c => !c.resolved).length;
-      document.getElementById('commentCount').textContent = openCount > 0 ? `(${openCount})` : '';
-
       const list = document.getElementById('commentsList');
       if (allItems.length === 0) {
-        list.innerHTML = '<p style="padding:40px 20px;text-align:center;color:var(--gray-500);font-size:0.85rem;">No comments or voice notes on this chapter yet.</p>';
+        list.innerHTML = '<p style="padding:40px 20px;text-align:center;color:var(--gray-500);font-size:0.85rem;background:transparent;">No messages on this chapter yet. Send a message or click a paragraph 💬 icon to reference it.</p>';
         return;
       }
 
       list.innerHTML = allItems.map(item => {
+        const isOutgoing = item.role === role;
+        const senderName = (item.role === 'reviewer' || item.role === 'CEO') ? 'CEO' : 'Emma';
+        
+        let contentHtml = '';
         if (item.isVoice) {
-          return `
-            <div class="comment-thread" style="border-left: 3px solid var(--blue);">
-              <div class="comment-bubble ${(item.role === 'reviewer' || item.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}">
-                <strong style="font-size:0.78rem;color:${(item.role === 'reviewer' || item.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">
-                  ${(item.role === 'reviewer' || item.role === 'CEO') ? '📋 CEO (Voice Note)' : '✍️ Emma (Voice Note)'}
-                </strong>
-                <div style="margin-top:8px;">
-                  <audio controls src="${item.audioData}" style="width:100%;height:36px;border-radius:4px;"></audio>
-                </div>
-                <div class="comment-meta">${formatDate(item.timestamp)} (${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, '0')})</div>
-              </div>
+          contentHtml = `
+            <div style="margin-top:4px;">
+              <audio controls src="${item.audioData}" style="width:100%;height:32px;border-radius:4px;outline:none;"></audio>
             </div>
           `;
+        } else {
+          contentHtml = `<p style="margin:2px 0 0;font-size:0.86rem;word-break:break-word;">${escapeHtml(item.text)}</p>`;
         }
+        
+        const quoteHtml = item.paragraphText 
+          ? `<div class="chat-quote" title="${escapeHtml(item.paragraphText)}">"${escapeHtml(item.paragraphText.substring(0, 50))}..."</div>`
+          : '';
 
         return `
-          <div class="comment-thread" style="${item.resolved ? 'opacity:0.5;' : ''}">
-            ${item.paragraphText ? `<div class="quoted-text">"${item.paragraphText.substring(0, 80)}..."</div>` : ''}
-            <div class="comment-bubble ${(item.role === 'reviewer' || item.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}">
-              <strong style="font-size:0.78rem;color:${(item.role === 'reviewer' || item.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(item.role === 'reviewer' || item.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
-              <p style="margin:6px 0 0;font-size:0.88rem;">${escapeHtml(item.text)}</p>
-              <div class="comment-meta">${formatDate(item.timestamp)}</div>
-            </div>
-            ${(item.replies || []).map(r => `
-              <div class="comment-bubble ${(r.role === 'reviewer' || r.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}" style="margin-left:16px;">
-                <strong style="font-size:0.78rem;color:${(r.role === 'reviewer' || r.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(r.role === 'reviewer' || r.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
-                <p style="margin:6px 0 0;font-size:0.85rem;">${escapeHtml(r.text)}</p>
-                <div class="comment-meta">${formatDate(r.timestamp)}</div>
-              </div>
-            `).join('')}
-            <div class="comment-actions">
-              ${!item.resolved ? `<button class="resolve-btn" onclick="resolveComment('${item.id}')">✓ Resolve</button>` : '<span style="font-size:0.75rem;color:var(--green);">✓ Resolved</span>'}
-              <button class="resolve-btn" style="background:var(--blue-bg);color:var(--blue);" onclick="replyToComment('${item.id}')">Reply</button>
+          <div class="chat-row ${isOutgoing ? 'outgoing' : 'incoming'}">
+            <div class="chat-bubble">
+              <span class="chat-sender-name">${senderName}</span>
+              ${quoteHtml}
+              ${contentHtml}
+              <span class="chat-time">${formatDate(item.timestamp)}</span>
             </div>
           </div>
         `;
       }).join('');
+
+      // Auto scroll to bottom
+      setTimeout(() => {
+        list.scrollTop = list.scrollHeight;
+      }, 50);
     }
 
     function openCommentFor(pIndex) {
       const panel = document.getElementById('commentsPanel');
       panel.classList.remove('hidden');
-      document.getElementById('commentText').focus();
-      document.getElementById('commentText').dataset.paragraphIndex = pIndex;
+      
+      const textEl = document.getElementById('commentText');
+      textEl.focus();
+      textEl.dataset.paragraphIndex = pIndex;
 
-      // Get paragraph text for context
       const commentable = document.querySelector(`[data-p="${pIndex}"]`);
       if (commentable) {
-        document.getElementById('commentText').dataset.paragraphText = commentable.textContent.trim();
+        const text = commentable.textContent.trim();
+        textEl.dataset.paragraphText = text;
+        
+        document.getElementById('replyPreviewText').textContent = `Reply to: "${text.substring(0, 45)}..."`;
+        document.getElementById('replyPreviewBar').style.display = 'flex';
+      }
+    }
+
+    function clearReplyQuote() {
+      const textEl = document.getElementById('commentText');
+      textEl.dataset.paragraphIndex = '';
+      textEl.dataset.paragraphText = '';
+      document.getElementById('replyPreviewBar').style.display = 'none';
+    }
+
+    function handleChatKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitComment();
       }
     }
 
@@ -312,16 +491,15 @@
       DB.addComment(bookId, ch.id, {
         text,
         role,
-        paragraphIndex: parseInt(textEl.dataset.paragraphIndex) || 0,
+        paragraphIndex: textEl.dataset.paragraphIndex ? parseInt(textEl.dataset.paragraphIndex) : null,
         paragraphText: textEl.dataset.paragraphText || '',
         resolved: false
       });
 
       textEl.value = '';
-      textEl.dataset.paragraphIndex = '';
-      textEl.dataset.paragraphText = '';
+      clearReplyQuote();
       selectChapter(currentChapter);
-      showToast('Comment posted', 'success');
+      showToast('Message sent', 'success');
     }
 
     function resolveComment(commentId) {
@@ -475,6 +653,7 @@
             role
           });
           loadVoiceNotes();
+          loadComments();
           showToast('Voice note saved', 'success');
         };
         reader.readAsDataURL(blob);
