@@ -237,36 +237,57 @@
       if (!bookChapters[currentChapter]) return;
       const ch = bookChapters[currentChapter];
       const comments = DB.getComments(bookId, ch.id);
+      const voiceNotes = DB.getVoiceNotes(bookId, ch.id).map(vn => ({ ...vn, isVoice: true }));
+      const allItems = [...comments, ...voiceNotes].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
       const openCount = comments.filter(c => !c.resolved).length;
       document.getElementById('commentCount').textContent = openCount > 0 ? `(${openCount})` : '';
 
       const list = document.getElementById('commentsList');
-      if (comments.length === 0) {
-        list.innerHTML = '<p style="padding:40px 20px;text-align:center;color:var(--gray-500);font-size:0.85rem;">No comments on this chapter yet.</p>';
+      if (allItems.length === 0) {
+        list.innerHTML = '<p style="padding:40px 20px;text-align:center;color:var(--gray-500);font-size:0.85rem;">No comments or voice notes on this chapter yet.</p>';
         return;
       }
 
-      list.innerHTML = comments.map(c => `
-        <div class="comment-thread" style="${c.resolved ? 'opacity:0.5;' : ''}">
-          ${c.paragraphText ? `<div class="quoted-text">"${c.paragraphText.substring(0, 80)}..."</div>` : ''}
-          <div class="comment-bubble ${(c.role === 'reviewer' || c.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}">
-            <strong style="font-size:0.78rem;color:${(c.role === 'reviewer' || c.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(c.role === 'reviewer' || c.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
-            <p style="margin:6px 0 0;font-size:0.88rem;">${escapeHtml(c.text)}</p>
-            <div class="comment-meta">${formatDate(c.timestamp)}</div>
-          </div>
-          ${(c.replies || []).map(r => `
-            <div class="comment-bubble ${(r.role === 'reviewer' || r.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}" style="margin-left:16px;">
-              <strong style="font-size:0.78rem;color:${(r.role === 'reviewer' || r.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(r.role === 'reviewer' || r.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
-              <p style="margin:6px 0 0;font-size:0.85rem;">${escapeHtml(r.text)}</p>
-              <div class="comment-meta">${formatDate(r.timestamp)}</div>
+      list.innerHTML = allItems.map(item => {
+        if (item.isVoice) {
+          return `
+            <div class="comment-thread" style="border-left: 3px solid var(--blue);">
+              <div class="comment-bubble ${(item.role === 'reviewer' || item.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}">
+                <strong style="font-size:0.78rem;color:${(item.role === 'reviewer' || item.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">
+                  ${(item.role === 'reviewer' || item.role === 'CEO') ? '📋 CEO (Voice Note)' : '✍️ Emma (Voice Note)'}
+                </strong>
+                <div style="margin-top:8px;">
+                  <audio controls src="${item.audioData}" style="width:100%;height:36px;border-radius:4px;"></audio>
+                </div>
+                <div class="comment-meta">${formatDate(item.timestamp)} (${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, '0')})</div>
+              </div>
             </div>
-          `).join('')}
-          <div class="comment-actions">
-            ${!c.resolved ? `<button class="resolve-btn" onclick="resolveComment('${c.id}')">✓ Resolve</button>` : '<span style="font-size:0.75rem;color:var(--green);">✓ Resolved</span>'}
-            <button class="resolve-btn" style="background:var(--blue-bg);color:var(--blue);" onclick="replyToComment('${c.id}')">Reply</button>
+          `;
+        }
+
+        return `
+          <div class="comment-thread" style="${item.resolved ? 'opacity:0.5;' : ''}">
+            ${item.paragraphText ? `<div class="quoted-text">"${item.paragraphText.substring(0, 80)}..."</div>` : ''}
+            <div class="comment-bubble ${(item.role === 'reviewer' || item.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}">
+              <strong style="font-size:0.78rem;color:${(item.role === 'reviewer' || item.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(item.role === 'reviewer' || item.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
+              <p style="margin:6px 0 0;font-size:0.88rem;">${escapeHtml(item.text)}</p>
+              <div class="comment-meta">${formatDate(item.timestamp)}</div>
+            </div>
+            ${(item.replies || []).map(r => `
+              <div class="comment-bubble ${(r.role === 'reviewer' || r.role === 'CEO') ? 'reviewer-comment' : 'author-comment'}" style="margin-left:16px;">
+                <strong style="font-size:0.78rem;color:${(r.role === 'reviewer' || r.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">${(r.role === 'reviewer' || r.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}</strong>
+                <p style="margin:6px 0 0;font-size:0.85rem;">${escapeHtml(r.text)}</p>
+                <div class="comment-meta">${formatDate(r.timestamp)}</div>
+              </div>
+            `).join('')}
+            <div class="comment-actions">
+              ${!item.resolved ? `<button class="resolve-btn" onclick="resolveComment('${item.id}')">✓ Resolve</button>` : '<span style="font-size:0.75rem;color:var(--green);">✓ Resolved</span>'}
+              <button class="resolve-btn" style="background:var(--blue-bg);color:var(--blue);" onclick="replyToComment('${item.id}')">Reply</button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function openCommentFor(pIndex) {
@@ -520,6 +541,7 @@
         if (typeof renderChapterList === 'function') renderChapterList();
       } else if (type === 'voicenotes') {
         if (typeof loadVoiceNotes === 'function') loadVoiceNotes();
+        if (typeof loadComments === 'function') loadComments();
       } else if (type === 'chapterStatus') {
         if (typeof renderChapterList === 'function') renderChapterList();
       } else if (type === 'books') {
