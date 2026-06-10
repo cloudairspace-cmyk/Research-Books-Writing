@@ -13,16 +13,17 @@
  * That's it! The platform will automatically sync between author and reviewer.
  */
 
-const FIREBASE_ENABLED = false; // Set to true after adding your config
+const FIREBASE_ENABLED = true; // Set to true after adding your config
 
 const FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC2LHI36s0wJJKiCxHSW__XhVhJ2uA5ZQw",
+  authDomain: "homers-review.firebaseapp.com",
+  databaseURL: "https://homers-review-default-rtdb.firebaseio.com",
+  projectId: "homers-review",
+  storageBucket: "homers-review.firebasestorage.app",
+  messagingSenderId: "301567134153",
+  appId: "1:301567134153:web:5d0ceb71b66d26dd284018",
+  measurementId: "G-JWN8926Q91"
 };
 
 // Firebase will be initialized when the scripts are loaded
