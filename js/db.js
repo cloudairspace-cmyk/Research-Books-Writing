@@ -14,17 +14,50 @@ const DB = {
     localStorage.setItem('hrc_' + key, JSON.stringify(val));
   },
 
-  // ---- Firebase Placeholder ----
+  // ---- Firebase Sync ----
   firebaseEnabled: false,
   firebaseConfig: null,
   db: null,
+  onUpdate: null,
 
   initFirebase(config) {
-    // Will be implemented when user provides Firebase config
-    // For now, everything falls back to localStorage
     this.firebaseConfig = config;
-    this.firebaseEnabled = true;
-    console.log('[DB] Firebase initialized');
+    if (typeof firebase !== 'undefined') {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(config);
+        }
+        this.db = firebase.database();
+        this.firebaseEnabled = true;
+        console.log('[DB] Firebase Realtime Database initialized');
+
+        // Set up real-time listeners for data sync
+        const paths = ['books', 'comments', 'voicenotes', 'versions', 'chapterStatus'];
+        paths.forEach(path => {
+          this.db.ref(path).on('value', (snapshot) => {
+            const val = snapshot.val();
+            if (val !== null) {
+              this._set(path, val);
+              if (this.onUpdate) {
+                try { this.onUpdate(path); } catch (e) { console.error('[DB] UI callback error:', e); }
+              }
+            }
+          });
+        });
+      } catch (e) {
+        console.error('[DB] Firebase initialization failed:', e);
+      }
+    } else {
+      console.warn('[DB] Firebase SDK not loaded. Running in offline/localStorage mode.');
+    }
+  },
+
+  _writeFirebase(path, data) {
+    if (this.firebaseEnabled && this.db) {
+      this.db.ref(path).set(data).catch(e => {
+        console.error(`[DB] Firebase write failed to ${path}:`, e);
+      });
+    }
   },
 
   // ---- Books ----
@@ -34,6 +67,7 @@ const DB = {
 
   setBooks(books) {
     this._set('books', books);
+    this._writeFirebase('books', books);
   },
 
   getBook(bookId) {
@@ -77,6 +111,7 @@ const DB = {
     comment.timestamp = new Date().toISOString();
     all[key].push(comment);
     this._set('comments', all);
+    this._writeFirebase('comments', all);
     return comment;
   },
 
@@ -89,6 +124,7 @@ const DB = {
         c.resolved = true;
         c.resolvedAt = new Date().toISOString();
         this._set('comments', all);
+        this._writeFirebase('comments', all);
       }
     }
   },
@@ -104,6 +140,7 @@ const DB = {
         reply.timestamp = new Date().toISOString();
         c.replies.push(reply);
         this._set('comments', all);
+        this._writeFirebase('comments', all);
       }
     }
   },
@@ -123,6 +160,7 @@ const DB = {
     note.timestamp = new Date().toISOString();
     all[key].push(note);
     this._set('voicenotes', all);
+    this._writeFirebase('voicenotes', all);
     return note;
   },
 
@@ -140,6 +178,7 @@ const DB = {
     version.number = all[bookId].length + 1;
     all[bookId].push(version);
     this._set('versions', all);
+    this._writeFirebase('versions', all);
     return version;
   },
 
@@ -153,6 +192,7 @@ const DB = {
     const all = this._get('chapterStatus') || {};
     all[bookId + '_' + chapterId] = status;
     this._set('chapterStatus', all);
+    this._writeFirebase('chapterStatus', all);
   },
 
   // ---- Export / Import ----
@@ -182,3 +222,8 @@ const DB = {
     }
   }
 };
+
+// Auto-initialize if global config is set to true
+if (typeof FIREBASE_ENABLED !== 'undefined' && FIREBASE_ENABLED) {
+  DB.initFirebase(FIREBASE_CONFIG);
+}

@@ -96,6 +96,10 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <script src="js/db.js"></script>
   <script src="js/books-data.js"></script>
   <script>
@@ -508,6 +512,36 @@
 
     // ---- Init ----
     loadBook();
+
+    // Real-time synchronization callback
+    DB.onUpdate = (type) => {
+      if (type === 'comments') {
+        if (typeof loadComments === 'function') loadComments();
+        if (typeof renderChapterList === 'function') renderChapterList();
+      } else if (type === 'voicenotes') {
+        if (typeof loadVoiceNotes === 'function') loadVoiceNotes();
+      } else if (type === 'chapterStatus') {
+        if (typeof renderChapterList === 'function') renderChapterList();
+      } else if (type === 'books') {
+        const books = DB.getBooks();
+        const bookMeta = books.find(b => b.id === bookId);
+        if (bookMeta) {
+          const statusClass = bookMeta.status === 'in-review' ? 'review' : bookMeta.status;
+          const statusEl = document.getElementById('bookStatus');
+          if (statusEl) {
+            statusEl.textContent = bookMeta.status === 'in-review' ? 'In Review' : bookMeta.status.charAt(0).toUpperCase() + bookMeta.status.slice(1);
+            statusEl.className = 'badge badge-' + statusClass;
+          }
+          const selectEl = document.getElementById('statusSelect');
+          if (selectEl) selectEl.value = bookMeta.status;
+        }
+      } else if (type === 'versions') {
+        const modal = document.getElementById('versionModal');
+        if (modal && modal.classList.contains('show') && typeof showVersions === 'function') {
+          showVersions();
+        }
+      }
+    };
   </script>
 </body>
 </html>

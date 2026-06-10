@@ -70,6 +70,10 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <script src="js/db.js"></script>
   <script src="js/books-data.js"></script>
   <script>
@@ -176,6 +180,11 @@
 
     // ---- Init ----
     renderBooks();
+
+    // Real-time sync callback
+    DB.onUpdate = (type) => {
+      renderBooks();
+    };
   </script>
 </body>
 </html>
