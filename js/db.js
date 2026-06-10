@@ -89,7 +89,15 @@ const DB = {
   getComments(bookId, chapterId) {
     const all = this._get('comments') || {};
     const key = bookId + '_' + chapterId;
-    return all[key] || [];
+    const val = all[key];
+    if (!val) return [];
+    const arr = Array.isArray(val) ? val : Object.values(val);
+    arr.forEach(c => {
+      if (c && c.replies && !Array.isArray(c.replies)) {
+        c.replies = Object.values(c.replies);
+      }
+    });
+    return arr;
   },
 
   getAllBookComments(bookId) {
@@ -97,7 +105,14 @@ const DB = {
     const result = [];
     for (const key in all) {
       if (key.startsWith(bookId + '_')) {
-        result.push(...all[key]);
+        const val = all[key];
+        const arr = Array.isArray(val) ? val : Object.values(val);
+        arr.forEach(c => {
+          if (c && c.replies && !Array.isArray(c.replies)) {
+            c.replies = Object.values(c.replies);
+          }
+        });
+        result.push(...arr);
       }
     }
     return result;
@@ -109,7 +124,13 @@ const DB = {
     if (!all[key]) all[key] = [];
     comment.id = 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
     comment.timestamp = new Date().toISOString();
-    all[key].push(comment);
+    
+    // Ensure all[key] is an array before pushing
+    let arr = all[key];
+    if (!Array.isArray(arr)) arr = Object.values(arr);
+    arr.push(comment);
+    all[key] = arr;
+
     this._set('comments', all);
     this._writeFirebase('comments', all);
     return comment;
@@ -119,10 +140,13 @@ const DB = {
     const all = this._get('comments') || {};
     const key = bookId + '_' + chapterId;
     if (all[key]) {
-      const c = all[key].find(x => x.id === commentId);
+      let arr = all[key];
+      if (!Array.isArray(arr)) arr = Object.values(arr);
+      const c = arr.find(x => x.id === commentId);
       if (c) {
         c.resolved = true;
         c.resolvedAt = new Date().toISOString();
+        all[key] = arr;
         this._set('comments', all);
         this._writeFirebase('comments', all);
       }
@@ -133,12 +157,20 @@ const DB = {
     const all = this._get('comments') || {};
     const key = bookId + '_' + chapterId;
     if (all[key]) {
-      const c = all[key].find(x => x.id === commentId);
+      let arr = all[key];
+      if (!Array.isArray(arr)) arr = Object.values(arr);
+      const c = arr.find(x => x.id === commentId);
       if (c) {
         if (!c.replies) c.replies = [];
+        let repArr = c.replies;
+        if (!Array.isArray(repArr)) repArr = Object.values(repArr);
+        
         reply.id = 'r_' + Date.now();
         reply.timestamp = new Date().toISOString();
-        c.replies.push(reply);
+        repArr.push(reply);
+        c.replies = repArr;
+        
+        all[key] = arr;
         this._set('comments', all);
         this._writeFirebase('comments', all);
       }
@@ -149,16 +181,23 @@ const DB = {
   getVoiceNotes(bookId, chapterId) {
     const all = this._get('voicenotes') || {};
     const key = bookId + '_' + chapterId;
-    return all[key] || [];
+    const val = all[key];
+    if (!val) return [];
+    return Array.isArray(val) ? val : Object.values(val);
   },
 
   addVoiceNote(bookId, chapterId, note) {
     const all = this._get('voicenotes') || {};
     const key = bookId + '_' + chapterId;
     if (!all[key]) all[key] = [];
+    let arr = all[key];
+    if (!Array.isArray(arr)) arr = Object.values(arr);
+    
     note.id = 'v_' + Date.now();
     note.timestamp = new Date().toISOString();
-    all[key].push(note);
+    arr.push(note);
+    all[key] = arr;
+
     this._set('voicenotes', all);
     this._writeFirebase('voicenotes', all);
     return note;
@@ -167,7 +206,9 @@ const DB = {
   // ---- Versions ----
   getVersions(bookId) {
     const all = this._get('versions') || {};
-    return all[bookId] || [];
+    const val = all[bookId];
+    if (!val) return [];
+    return Array.isArray(val) ? val : Object.values(val);
   },
 
   addVersion(bookId, version) {
