@@ -7,7 +7,7 @@ const BOOKS_DATA = [
     number: 1,
     title: 'Research Methodology: A Comprehensive Guide',
     type: 'Academic Research',
-    description: 'Foundation of research — types, designs, paradigms, and the full research lifecycle from conception to publication.',
+    description: 'Foundation of research - types, designs, paradigms, and the full research lifecycle from conception to publication.',
     chapters: 13,
     status: 'draft',
     lastUpdated: null
@@ -17,7 +17,7 @@ const BOOKS_DATA = [
     number: 2,
     title: 'Quantitative Research Methods: Statistical Analysis & Data Interpretation',
     type: 'Academic Research',
-    description: 'Numbers-driven research — surveys, experiments, statistical tests, SPSS, hypothesis testing, and data visualization.',
+    description: 'Numbers-driven research - surveys, experiments, statistical tests, SPSS, hypothesis testing, and data visualization.',
     chapters: 11,
     status: 'draft',
     lastUpdated: null
@@ -57,7 +57,7 @@ const BOOKS_DATA = [
     number: 6,
     title: 'Mixed Methods Research: Integrating Quantitative & Qualitative Approaches',
     type: 'Academic Research',
-    description: 'When and how to combine methods — convergent, explanatory, exploratory, and embedded designs.',
+    description: 'When and how to combine methods - convergent, explanatory, exploratory, and embedded designs.',
     chapters: 10,
     status: 'draft',
     lastUpdated: null
@@ -87,7 +87,7 @@ const BOOKS_DATA = [
     number: 9,
     title: 'Business Research Methods: From Problem to Strategic Decision',
     type: 'Business Research',
-    description: 'Applied research in business — case studies, action research, consulting frameworks, and strategic analysis.',
+    description: 'Applied research in business - case studies, action research, consulting frameworks, and strategic analysis.',
     chapters: 10,
     status: 'draft',
     lastUpdated: null
