@@ -8,7 +8,7 @@ const BOOKS_DATA = [
     title: 'Research Methodology: A Comprehensive Guide',
     type: 'Academic Research',
     description: 'Foundation of research — types, designs, paradigms, and the full research lifecycle from conception to publication.',
-    chapters: 12,
+    chapters: 13,
     status: 'draft',
     lastUpdated: null
   },
