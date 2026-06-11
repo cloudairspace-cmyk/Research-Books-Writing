@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | Homers Research Consult</title>
   <link rel="stylesheet" href="css/main.css?v=1.3">
+  <style>
+    @media (max-width: 768px) {
+      .navbar { padding: 0 12px; height: auto; min-height: 50px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+      .navbar-brand { gap: 8px; }
+      .navbar-brand h2 { font-size: 0.85rem !important; }
+      .navbar-brand img { width: 30px !important; height: 30px !important; }
+      .navbar-brand span { font-size: 0.65rem !important; }
+      .dashboard { padding: 14px 12px; }
+      .dashboard-header h1 { font-size: 1.2rem; }
+      .stats-row { gap: 8px; }
+      .stat-card { min-width: 100px; padding: 12px 14px; }
+      .stat-card .stat-number { font-size: 1.4rem; }
+      .stat-card .stat-label { font-size: 0.65rem; }
+      .books-grid { grid-template-columns: 1fr; gap: 12px; }
+      .book-card-body { padding: 16px 18px; }
+      .book-card h3 { font-size: 0.95rem; }
+    }
+    @media (max-width: 480px) {
+      .navbar-brand h2 { font-size: 0.78rem !important; }
+      .stats-row { flex-direction: row; flex-wrap: wrap; }
+      .stat-card { min-width: 80px; flex: 1 1 45%; }
+    }
+  </style>
 </head>
 <body>
 
