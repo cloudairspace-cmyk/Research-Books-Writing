@@ -235,6 +235,20 @@ textarea{resize:vertical;min-height:90px}
 .toast-error{background:#FEF2F2;border:1px solid var(--red);color:var(--red)}
 .toast-info{background:#EFF6FF;border:1px solid var(--blue);color:var(--blue)}
 
+/* Concept Diagrams */
+.diagram-container { margin: 24px 0; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-soft); padding: 20px; overflow: hidden; }
+.diagram-header { font-family: var(--font-heading); font-weight: 700; color: var(--navy); margin-bottom: 16px; font-size: 1.1rem; text-align: center; }
+.diagram-grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.diagram-box { background: var(--bg); border: 1px solid var(--border-light); padding: 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); text-align: center; }
+.diagram-box h4 { margin-bottom: 8px; color: var(--indigo); font-size: 1rem; }
+.diagram-box p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+.diagram-flow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.diagram-flow .diagram-box { flex: 1; min-width: 120px; border-top: 3px solid var(--teal); }
+.diagram-arrow { color: var(--text-muted); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+.header-image { width: 100%; height: auto; max-height: 350px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow-md); border: 1px solid var(--border); }
+@media(max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .diagram-flow { flex-direction: column; } .diagram-arrow { transform: rotate(90deg); } }
 /* Responsive */
 @media(max-width:1024px){.chapter-sidebar{width:210px}.comments-panel{width:280px}.reader-main{padding:28px}}
 @media(max-width:768px){.navbar{padding:0 14px}.dashboard{padding:14px}.books-grid{grid-template-columns:1fr}.reader-layout{flex-direction:column}.chapter-sidebar{width:100%;height:auto;max-height:180px}.comments-panel{width:100%;height:280px}.reader-main{padding:16px}.stats-row{flex-direction:column}}
