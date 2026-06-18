@@ -1,104 +1,106 @@
 /**
  * Books metadata - the 10 research books
+ * Based on the official HRC TOC (June 2026)
+ * 8 Academic Research Books + 2 Business Research Books
  */
 const BOOKS_DATA = [
   {
     id: 'book-01',
     number: 1,
-    title: 'Research Methodology: A Comprehensive Guide',
+    title: 'The Research Mind',
     type: 'Academic Research',
-    description: 'Foundation of research - types, designs, paradigms, and the full research lifecycle from conception to publication.',
-    chapters: 13,
+    description: 'How to Think, Question, and Reason Like a Scholar — training the intellectual engine behind every great researcher.',
+    chapters: 24,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-02',
     number: 2,
-    title: 'Quantitative Research Methods: Statistical Analysis & Data Interpretation',
+    title: 'Finding and Reading Research',
     type: 'Academic Research',
-    description: 'Numbers-driven research - surveys, experiments, statistical tests, SPSS, hypothesis testing, and data visualization.',
-    chapters: 11,
+    description: 'How to Search, Evaluate, and Extract Knowledge from Academic Sources — navigating journals, databases, and building knowledge systems.',
+    chapters: 25,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-03',
     number: 3,
-    title: 'Qualitative Research Methods: Theory, Design & Practice',
+    title: 'Designing Your Study',
     type: 'Academic Research',
-    description: 'In-depth exploration of interviews, focus groups, ethnography, thematic analysis, and qualitative software tools.',
-    chapters: 10,
+    description: 'A Decision-Based Guide to Research Methodology — every chapter is a decision point from paradigm to sampling.',
+    chapters: 23,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-04',
     number: 4,
-    title: 'Literature Review & Systematic Review: A Step-by-Step Guide',
+    title: 'Data Unravelled',
     type: 'Academic Research',
-    description: 'How to search, evaluate, synthesize, and write comprehensive literature reviews and systematic reviews.',
-    chapters: 9,
+    description: 'How to Analyse, Interpret, and Present Research Findings — from data cleaning to compelling visualisation.',
+    chapters: 24,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-05',
     number: 5,
-    title: 'Research Ethics & Integrity in Academic Research',
+    title: 'The Literature Review Mastery Guide',
     type: 'Academic Research',
-    description: 'IRB processes, informed consent, plagiarism prevention, data integrity, and ethical research frameworks.',
-    chapters: 10,
+    description: 'How to Search, Synthesise, and Write a Review That Stands on Its Own — the most misunderstood part of research, mastered.',
+    chapters: 23,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-06',
     number: 6,
-    title: 'Mixed Methods Research: Integrating Quantitative & Qualitative Approaches',
+    title: 'The Academic Writer',
     type: 'Academic Research',
-    description: 'When and how to combine methods - convergent, explanatory, exploratory, and embedded designs.',
-    chapters: 10,
+    description: 'Producing Clear, Credible, and Compelling Research Writing — not what to research, but how to write about it.',
+    chapters: 24,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-07',
     number: 7,
-    title: 'Academic Writing & Publishing: From Thesis to Journal Article',
+    title: 'From Dissertation to Defence',
     type: 'Academic Research',
-    description: 'Writing style, thesis structure, journal selection, peer review navigation, and open access publishing.',
-    chapters: 11,
+    description: 'Completing Your Thesis with Confidence from Start to Finish — managing the most demanding academic undertaking.',
+    chapters: 25,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-08',
     number: 8,
-    title: 'Research Proposal Writing: Securing Funding & Approval',
+    title: 'Research Ethics in Practice',
     type: 'Academic Research',
-    description: 'Grant writing, proposal structure, budgeting, timelines, and navigating institutional approval processes.',
-    chapters: 9,
+    description: 'Principles, Dilemmas, and Decision-Making for Responsible Scholars — ethics as a continuous practice, not a checkbox.',
+    chapters: 24,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-09',
     number: 9,
-    title: 'Business Research Methods: From Problem to Strategic Decision',
+    title: 'Winning Research Funding',
     type: 'Business Research',
-    description: 'Applied research in business - case studies, action research, consulting frameworks, and strategic analysis.',
-    chapters: 10,
+    description: 'How to Write Proposals That Get Approved and Grants That Get Awarded — the science and strategy of securing funding.',
+    chapters: 25,
     status: 'draft',
     lastUpdated: null
   },
   {
     id: 'book-10',
     number: 10,
-    title: 'Market Research & Consumer Insights: Data-Driven Strategies',
+    title: 'Research to Impact',
     type: 'Business Research',
-    description: 'Consumer surveys, focus groups, competitive analysis, data analytics, and insight-driven business strategy.',
-    chapters: 10,
+    description: 'How to Communicate Your Findings to the World Beyond Academia — translating research into real-world change.',
+    chapters: 24,
     status: 'draft',
     lastUpdated: null
   }
