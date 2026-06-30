@@ -2,850 +2,852 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
   <title>Book Reader | Homers Research Consult</title>
-  <link rel="stylesheet" href="css/main.css?v=1.3">
+  <link rel="stylesheet" href="css/main.css?v=2.0">
   <style>
-    /* WhatsApp Chat Styles */
-    .comments-panel {
-      display: flex !important;
-      flex-direction: column;
-      background: #efeae2;
-      position: relative;
+    /* ===== BODY ===== */
+    body.book-body { background:#2d2d30; overflow:hidden; height:100vh; display:flex; flex-direction:column; margin:0; }
+
+    /* ===== LOADER ===== */
+    .book-loader {
+      position:fixed;inset:0;z-index:999;background:linear-gradient(135deg,#1a1a2e,#16213e);
+      display:flex;align-items:center;justify-content:center;transition:opacity .5s ease;
     }
-    .comments-panel.hidden {
-      display: none !important;
+    .book-loader.hidden{opacity:0;pointer-events:none;}
+    .loader-content{text-align:center;color:rgba(255,255,255,.85);}
+    .loader-icon{font-size:3.5rem;margin-bottom:18px;animation:bookPulse 1.8s ease-in-out infinite;}
+    .loader-title{font-family:var(--font-heading);font-size:1.1rem;margin-bottom:20px;}
+    .loader-dots{display:flex;justify-content:center;gap:6px;}
+    .loader-dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);animation:dotBounce 1.4s ease-in-out infinite;}
+    .loader-dots span:nth-child(2){animation-delay:.2s}
+    .loader-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bookPulse{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.08) rotate(3deg)}}
+    @keyframes dotBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+
+    /* ===== TOP BAR ===== */
+    .book-topbar{
+      height:44px;display:flex;align-items:center;padding:0 12px;
+      background:#3c3f41;border-bottom:1px solid #2a2a2c;flex-shrink:0;z-index:100;gap:8px;
     }
-    
-    #commentsList {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #efeae2 url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') repeat;
+    .topbar-back{display:flex;align-items:center;gap:6px;color:#ccc;text-decoration:none;font-size:.82rem;transition:color .2s;white-space:nowrap;}
+    .topbar-back:hover{color:#fff;}
+    .topbar-logo{width:24px;height:24px;border-radius:50%;object-fit:cover;}
+    .topbar-title{color:#e0e0e0;font-size:.82rem;font-family:var(--font-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;}
+    .topbar-sep{width:1px;height:22px;background:#555;flex-shrink:0;}
+    .topbar-zoom{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+    .zoom-btn{
+      width:28px;height:28px;border-radius:4px;border:1px solid #555;background:transparent;
+      color:#ccc;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;
     }
-    
-    .chat-row {
-      display: flex;
-      width: 100%;
-      margin: 2px 0;
+    .zoom-btn:hover{background:#505355;color:#fff;}
+    .zoom-label{color:#aaa;font-size:.72rem;font-family:var(--font-body);width:36px;text-align:center;}
+    .topbar-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .topbar-btn{
+      height:28px;padding:0 10px;border-radius:4px;border:1px solid #555;background:transparent;
+      color:#ccc;cursor:pointer;font-size:.72rem;font-family:var(--font-body);display:flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap;
     }
-    .chat-row.outgoing { justify-content: flex-end; }
-    .chat-row.incoming { justify-content: flex-start; }
-    
-    .chat-bubble {
-      max-width: 85%;
-      padding: 8px 12px 6px;
-      border-radius: 8px;
-      position: relative;
-      box-shadow: 0 1px 1.5px rgba(0,0,0,0.12);
-      font-size: 0.88rem;
-      line-height: 1.4;
-      display: flex;
-      flex-direction: column;
+    .topbar-btn:hover{background:#505355;color:#fff;}
+    .topbar-actions select{
+      background:#3c3f41;color:#ccc;border:1px solid #555;border-radius:4px;padding:4px 6px;font-size:.68rem;cursor:pointer;font-family:var(--font-body);
     }
-    .chat-row.outgoing .chat-bubble {
-      background: #d9fdd3;
-      color: #111b21;
-      border-top-right-radius: 0;
+    .topbar-actions select option{background:#3c3f41;color:#e0e0e0;}
+    .topbar-actions .role-badge{font-size:.6rem;padding:2px 6px;}
+
+    /* ===== BOOK VIEWER ===== */
+    .book-viewer{display:flex;flex:1;min-height:0;overflow:hidden;}
+
+    /* ===== SIDEBAR ===== */
+    .page-sidebar{
+      width:72px;background:#2d2d30;border-right:1px solid #222;overflow-y:auto;overflow-x:hidden;
+      flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;
+      scrollbar-width:thin;scrollbar-color:#555 transparent;
     }
-    .chat-row.incoming .chat-bubble {
-      background: #ffffff;
-      color: #111b21;
-      border-top-left-radius: 0;
+    .page-sidebar::-webkit-scrollbar{width:4px;}
+    .page-sidebar::-webkit-scrollbar-thumb{background:#555;border-radius:2px;}
+    .sidebar-item{
+      width:52px;aspect-ratio:0.73;background:#fff;border:2px solid transparent;border-radius:2px;
+      cursor:pointer;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:all .15s;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
     }
-    
-    .chat-sender-name {
-      font-size: 0.72rem;
-      font-weight: 700;
-      margin-bottom: 3px;
+    .sidebar-item:hover{border-color:#6b9dff;}
+    .sidebar-item.active{border-color:#4285f4;}
+    .sidebar-item-num{font-size:.55rem;color:#888;font-family:var(--font-body);position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);}
+
+    /* ===== SCROLL AREA ===== */
+    .scroll-area{
+      flex:1;overflow-y:auto;overflow-x:hidden;background:#525659;
+      display:flex;flex-direction:column;align-items:center;padding:12px 20px;gap:8px;
     }
-    .chat-row.outgoing .chat-sender-name { color: #008069; }
-    .chat-row.incoming .chat-sender-name { color: var(--blue); }
-    
-    .chat-quote {
-      background: rgba(0, 0, 0, 0.05);
-      border-left: 3px solid var(--gold);
-      padding: 4px 8px;
-      border-radius: 4px;
-      margin-bottom: 6px;
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      font-style: italic;
-      max-width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .chat-time {
-      font-size: 0.65rem;
-      color: #667781;
-      align-self: flex-end;
-      margin-top: 4px;
-    }
-    
-    /* Input Area */
-    .chat-input-container {
-      background: #f0f2f5;
-      padding: 10px 16px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .chat-input-field {
-      flex: 1;
-      background: #ffffff;
-      border: 1px solid #e1e9eb;
-      border-radius: 20px;
-      padding: 9px 15px;
-      font-size: 0.88rem;
-      color: #111b21;
-      outline: none;
-      font-family: var(--font-body);
-    }
-    .chat-action-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.25rem;
-      color: #54656f;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-    .chat-action-btn:hover {
-      color: #111b21;
-      transform: scale(1.05);
-    }
-    .chat-send-btn {
-      background: #008069;
-      color: #ffffff;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.95rem;
-      transition: var(--transition);
-      box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-    }
-    .chat-send-btn:hover {
-      background: #006e5a;
-      transform: scale(1.05);
+    .scroll-area::-webkit-scrollbar{width:10px;height:10px;}
+    .scroll-area::-webkit-scrollbar-thumb{background:#888;border-radius:5px;border:2px solid #525659;}
+    .scroll-area::-webkit-scrollbar-track{background:#525659;}
+
+    /* ===== PAGE WRAPPER (for zoom) ===== */
+    .page-wrapper{flex-shrink:0;overflow:hidden;position:relative;}
+
+    /* ===== BOOK PAGE ===== */
+    .book-page{
+      width:700px;height:960px;background:#fff;position:relative;display:flex;flex-direction:column;
+      box-shadow:0 1px 4px rgba(0,0,0,.15),0 0 0 1px rgba(0,0,0,.05);
+      transform-origin:top left;
+      content-visibility:auto;contain-intrinsic-height:960px;
     }
 
-    /* ===== MOBILE RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      /* Navbar */
-      .navbar {
-        padding: 0 10px;
-        height: auto;
-        min-height: 50px;
-        flex-wrap: wrap;
-        gap: 6px;
-        padding-top: 8px;
-        padding-bottom: 8px;
-      }
-      .navbar-brand { gap: 8px; }
-      .navbar-brand h2 { font-size: 0.82rem !important; }
-      .navbar-brand img { width: 26px !important; height: 26px !important; }
-      .navbar-actions {
-        gap: 6px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-      }
-      .navbar-actions .btn-sm { padding: 5px 10px; font-size: 0.72rem; }
-      .navbar-actions select { font-size: 0.72rem; padding: 4px 8px !important; }
-      .role-badge { font-size: 0.62rem !important; padding: 3px 8px !important; }
+    /* ===== PAGE HEADER ===== */
+    .page-header-bar{
+      height:28px;padding:0 65px;display:flex;align-items:center;justify-content:space-between;
+      font-size:.58rem;color:#999;text-transform:uppercase;letter-spacing:1.5px;
+      font-family:var(--font-body);border-bottom:1px solid #eee;flex-shrink:0;
+    }
+    .page-header-bar .hdr-left{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%;}
+    .page-header-bar .hdr-right{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%;}
 
-      /* Reader layout: stack vertically */
-      .reader-layout {
-        flex-direction: column;
-        height: auto;
-        min-height: calc(100vh - 50px);
-      }
-
-      /* Chapter sidebar: horizontal scrollable strip */
-      .chapter-sidebar {
-        width: 100%;
-        height: auto;
-        max-height: none;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding: 10px 0;
-        overflow-x: auto;
-        overflow-y: hidden;
-        flex-shrink: 0;
-      }
-      .chapter-sidebar h3 { font-size: 0.65rem; padding: 0 12px; margin-bottom: 6px; }
-      .chapter-list {
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 0 12px;
-        gap: 4px;
-        -webkit-overflow-scrolling: touch;
-      }
-      .chapter-item {
-        white-space: nowrap;
-        padding: 6px 12px;
-        font-size: 0.75rem;
-        border-left: none;
-        border-bottom: 3px solid transparent;
-        flex-shrink: 0;
-        border-radius: 6px;
-        background: var(--bg-soft);
-      }
-      .chapter-item.active {
-        border-bottom-color: var(--indigo);
-        background: var(--indigo-bg);
-      }
-
-      /* Main content area */
-      .reader-main {
-        flex: 1;
-        padding: 16px 14px;
-        max-width: 100%;
-        overflow-y: auto;
-        min-height: 300px;
-      }
-      .reader-main h1 { font-size: 1.3rem; }
-      .reader-main h2 { font-size: 1.1rem; margin: 18px 0 10px; }
-      .reader-main p { font-size: 0.9rem; line-height: 1.7; }
-
-      /* Chat panel: full-screen overlay on mobile */
-      .comments-panel {
-        position: fixed !important;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100% !important;
-        height: 100% !important;
-        z-index: 200;
-        border-left: none;
-      }
-
-      /* Chat bubbles */
-      .chat-bubble { max-width: 90%; font-size: 0.84rem; }
-      .chat-input-container { padding: 8px 10px; gap: 8px; }
-      .chat-input-field { padding: 8px 12px; font-size: 0.84rem; }
-      .chat-send-btn { width: 34px; height: 34px; }
-
-      /* Voice recorder */
-      .voice-recorder { bottom: 12px; right: 12px; }
-      .voice-btn { width: 42px; height: 42px; font-size: 16px; }
-      .voice-panel { width: 250px; padding: 14px; }
-
-      /* Commentable paragraphs */
-      .commentable { padding-right: 28px; }
-      .comment-trigger { width: 22px; height: 22px; font-size: 10px; }
+    /* ===== PAGE FOOTER ===== */
+    .page-footer-bar{
+      height:28px;display:flex;align-items:center;justify-content:center;
+      font-size:.75rem;color:#888;font-family:var(--font-body);border-top:1px solid #eee;flex-shrink:0;
     }
 
-    @media (max-width: 480px) {
-      .navbar-brand h2 { font-size: 0.72rem !important; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .navbar-actions select { max-width: 100px; }
-      .reader-main { padding: 12px 10px; }
-      .reader-main h1 { font-size: 1.15rem; }
-      .reader-main p { font-size: 0.85rem; }
+    /* ===== PAGE BODY ===== */
+    .page-body{
+      flex:1;padding:20px 65px;overflow:hidden;min-height:0;
+      word-wrap:break-word;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto;
+    }
+    .page-body *{max-width:100%;box-sizing:border-box;}
+
+    /* ===== PAGE TYPOGRAPHY ===== */
+    .page-body h1{font-family:var(--font-heading);font-size:1.45rem;color:#1a2332;margin:0 0 5px;line-height:1.25;}
+    .page-body h2{font-family:var(--font-heading);font-size:1.05rem;color:#1a2332;margin:14px 0 7px;padding-bottom:4px;border-bottom:1px solid #e0d8c8;line-height:1.3;}
+    .page-body h2[style*="font-size"]{font-size:1.25rem !important;margin-bottom:2px !important;}
+    .page-body h3{font-family:var(--font-heading);font-size:.95rem;margin:10px 0 6px;color:#2D3E50;}
+    .page-body p{font-family:var(--font-body);font-size:.88rem;line-height:1.78;margin:0 0 10px;color:#333;text-align:justify;text-justify:inter-word;}
+    .page-body blockquote{
+      border-left:3px solid #1a3a5c;padding:10px 14px;margin:12px 0;
+      background:#f0f4f8;border-radius:0 6px 6px 0;font-size:.84rem;line-height:1.55;color:#4B5563;
+    }
+    .page-body blockquote strong{color:#1a2332;}
+    .page-body strong{color:#1a2332;font-weight:600;}
+    .page-body table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.82rem;table-layout:fixed;word-wrap:break-word;}
+    .page-body th{
+      background:#1a3a5c;color:#fff;font-weight:600;padding:8px 10px;text-align:left;
+      border:1px solid #1a3a5c;font-size:.8rem;word-wrap:break-word;overflow-wrap:break-word;
+    }
+    .page-body td{padding:7px 10px;border:1px solid #d1d5db;color:#374151;word-wrap:break-word;overflow-wrap:break-word;}
+    .page-body tr:nth-child(even) td{background:#f9fafb;}
+    .page-body ul,.page-body ol{margin:0 0 10px 18px;color:#374151;font-size:.88rem;}
+    .page-body li{margin-bottom:3px;line-height:1.65;}
+
+    /* ===== CHAPTER START ===== */
+    .page-body.chapter-start>h1:first-child{
+      font-family:var(--font-body) !important;font-size:.72rem !important;
+      text-transform:uppercase;letter-spacing:4px;color:#B8922F !important;
+      font-weight:600;margin-bottom:6px !important;line-height:1 !important;
+    }
+    .page-body.chapter-start>h1:first-child+h2{
+      font-size:1.35rem !important;border-bottom:2px solid #1a3a5c !important;
+      padding-bottom:14px !important;margin-top:0 !important;color:#1a2332 !important;
+    }
+    .page-body.chapter-start .drop-cap::first-letter{
+      font-family:var(--font-heading);font-size:2.8rem;float:left;
+      line-height:.82;padding-right:7px;padding-top:3px;color:#1a3a5c;font-weight:700;
+    }
+
+    /* ===== TITLE PAGE ===== */
+    .book-title-page{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:0 30px;}
+    .title-page-cat{font-family:var(--font-body);font-size:.68rem;text-transform:uppercase;letter-spacing:3.5px;color:#999;margin-bottom:36px;}
+    .title-page-title{font-family:var(--font-heading);font-size:2.1rem;color:#1a2332;font-weight:800;margin-bottom:10px;line-height:1.2;}
+    .title-page-subtitle{font-family:var(--font-body);font-size:.9rem;color:#666;font-style:italic;max-width:85%;line-height:1.55;}
+    .title-page-rule{width:50px;height:2px;background:linear-gradient(90deg,transparent,#B8922F,transparent);margin:30px 0;}
+    .title-page-author{font-family:var(--font-body);font-size:.82rem;color:#555;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+    .title-page-pub{font-family:var(--font-body);font-size:.72rem;color:#999;}
+
+    /* ===== PART TITLE PAGE ===== */
+    .part-title-page{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;}
+    .part-label{font-family:var(--font-body);font-size:.72rem;text-transform:uppercase;letter-spacing:4px;color:#B8922F;margin-bottom:14px;font-weight:600;}
+    .part-name{font-family:var(--font-heading);font-size:1.65rem;color:#1a2332;font-weight:700;line-height:1.35;max-width:85%;}
+    .part-rule{width:40px;height:2px;background:#d1d5db;margin:20px 0;}
+
+    /* ===== DIAGRAMS (light page overrides) ===== */
+    .page-body .diagram-container{
+      background:#f0f4f8 !important;border:1px solid #d1d5db !important;border-radius:8px;
+      margin:14px 0;padding:14px;overflow:hidden;
+    }
+    .page-body .diagram-header{color:#1a2332 !important;font-size:.92rem;margin-bottom:10px;font-weight:700;}
+    .page-body .diagram-grid{gap:10px;}
+    .page-body .diagram-box{
+      background:#fff !important;border:1px solid #d1d5db !important;padding:12px;border-radius:6px;
+      border-top:3px solid #1a3a5c !important;overflow:hidden;word-wrap:break-word;
+    }
+    .page-body .diagram-box[style*="border-top-color"]{/* inline style overrides work */}
+    .page-body .diagram-box h4{color:#1a2332 !important;font-size:.84rem;margin-bottom:3px;}
+    .page-body .diagram-box p{color:#4b5563 !important;font-size:.78rem;text-align:center;margin:0;line-height:1.45;word-wrap:break-word;}
+    .page-body .diagram-flow{gap:8px;flex-wrap:wrap;}
+    .page-body .diagram-flow .diagram-box{min-width:60px;}
+    .page-body .diagram-arrow{color:#6b7280 !important;font-size:1rem;}
+
+    /* SVG illustration containers - prevent text clipping */
+    .page-body svg{overflow:visible;max-width:100%;height:auto;display:block;margin:0 auto;}
+    .page-body div[style*="margin"]:has(svg){overflow:visible;max-width:100%;box-sizing:border-box;}
+    .page-body div[style*="background"]:has(svg){overflow:visible;max-width:100%;box-sizing:border-box;}
+    .page-body p[style*="italic"]{overflow:visible;word-wrap:break-word;}
+
+    /* ===== PAGE INDICATOR BAR ===== */
+    .page-bar{
+      height:32px;background:#3c3f41;border-top:1px solid #2a2a2c;display:flex;align-items:center;
+      justify-content:center;gap:8px;flex-shrink:0;color:#aaa;font-size:.75rem;font-family:var(--font-body);
+    }
+    .page-bar input{
+      width:42px;text-align:center;background:#2d2d30;border:1px solid #555;border-radius:3px;
+      color:#e0e0e0;padding:2px;font-size:.75rem;font-family:var(--font-body);outline:none;
+      -moz-appearance:textfield;
+    }
+    .page-bar input::-webkit-inner-spin-button{-webkit-appearance:none;}
+    .page-bar input:focus{border-color:#4285f4;box-shadow:0 0 0 1px #4285f4;}
+
+    /* ===== TOC MODAL ===== */
+    .toc-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;}
+    .toc-modal.show{display:flex;}
+    .toc-panel{
+      width:92%;max-width:520px;max-height:82vh;background:#fff;border-radius:10px;overflow:hidden;
+      display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:fadeUp .2s ease;
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .toc-head{padding:18px 22px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb;}
+    .toc-head h2{font-size:1.1rem;margin:0;color:#1a2332;}
+    .toc-close{width:30px;height:30px;border-radius:50%;border:none;background:#f3f4f6;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;color:#666;}
+    .toc-close:hover{background:#e5e7eb;}
+    .toc-list{overflow-y:auto;padding:6px 0;flex:1;}
+    .toc-part{padding:14px 22px 5px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#B8922F;font-family:var(--font-body);}
+    .toc-item{
+      display:flex;align-items:center;justify-content:space-between;padding:8px 22px;cursor:pointer;
+      transition:background .12s;font-size:.85rem;color:#4b5563;gap:12px;
+    }
+    .toc-item:hover{background:#f3f4f6;color:#1a2332;}
+    .toc-item span:first-child{flex:1;min-width:0;}
+    .toc-page-num{font-size:.72rem;color:#9ca3af;flex-shrink:0;font-variant-numeric:tabular-nums;}
+
+    /* ===== COMMENTS DRAWER ===== */
+    .comments-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:249;display:none;cursor:pointer;}
+    .comments-backdrop.show{display:block;}
+    .comments-drawer{
+      position:fixed;top:0;right:0;bottom:0;width:360px;z-index:250;
+      transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+      display:flex;flex-direction:column;background:#efeae2;box-shadow:-6px 0 30px rgba(0,0,0,.2);
+    }
+    .comments-drawer.show{transform:translateX(0);}
+    .comments-drawer-header{background:#075e54;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .comments-drawer-header h3{font-size:.88rem;font-family:var(--font-body);font-weight:600;margin:0;}
+    .comments-drawer-header span{font-size:.68rem;color:rgba(255,255,255,.6);display:block;margin-top:1px;}
+    .drawer-close-btn{width:30px;height:30px;border-radius:50%;border:none;background:none;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+    .comments-list{flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:#efeae2;}
+    .comments-list .chat-row{display:flex;width:100%;margin:2px 0;}
+    .comments-list .chat-row.outgoing{justify-content:flex-end;}
+    .comments-list .chat-row.incoming{justify-content:flex-start;}
+    .comments-list .chat-bubble{max-width:85%;padding:7px 11px 5px;border-radius:8px;position:relative;box-shadow:0 1px 1.5px rgba(0,0,0,.12);font-size:.86rem;line-height:1.4;display:flex;flex-direction:column;}
+    .comments-list .chat-row.outgoing .chat-bubble{background:#d9fdd3;color:#111b21;border-top-right-radius:0;}
+    .comments-list .chat-row.incoming .chat-bubble{background:#fff;color:#111b21;border-top-left-radius:0;}
+    .comments-list .chat-sender-name{font-size:.7rem;font-weight:700;margin-bottom:2px;}
+    .comments-list .chat-row.outgoing .chat-sender-name{color:#008069;}
+    .comments-list .chat-row.incoming .chat-sender-name{color:#4285f4;}
+    .comments-list .chat-time{font-size:.62rem;color:#667781;align-self:flex-end;margin-top:3px;}
+    .comments-input{background:#f0f2f5;padding:8px 12px;border-top:1px solid #d1d5db;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .comments-input input{flex:1;background:#fff;border:1px solid #e1e9eb;border-radius:20px;padding:8px 14px;font-size:.84rem;color:#111b21;outline:none;font-family:var(--font-body);}
+    .comments-input input:focus{border-color:#0D9488;}
+    .comments-input .mic-btn,.comments-input .send-btn{width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;}
+    .comments-input .mic-btn{background:none;color:#54656f;}
+    .comments-input .mic-btn:hover{color:#111b21;transform:scale(1.08);}
+    .comments-input .send-btn{background:#008069;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1);}
+    .comments-input .send-btn:hover{background:#006e5a;transform:scale(1.06);}
+
+    /* Voice mini-panel */
+    .voice-mini-panel{background:#f0f2f5;padding:10px 14px;border-top:1px solid #d1d5db;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .voice-mini-panel .voice-timer{font-family:var(--font-heading);font-size:1.1rem;color:#4F46E5;font-weight:700;}
+    .voice-mini-panel button{padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-size:.78rem;font-weight:600;font-family:var(--font-body);transition:all .2s;}
+    .voice-mini-panel .rec-btn{background:#dc2626;color:#fff;}
+    .voice-mini-panel .rec-btn.paused{background:#4F46E5;}
+    .voice-mini-panel .save-btn{background:#16a34a;color:#fff;}
+    .voice-mini-panel .close-voice{background:#e5e7eb;color:#555;}
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:840px){
+      .page-sidebar{display:none;}
+      .book-topbar{padding:0 8px;}
+      .topbar-title{font-size:.75rem;}
+      .topbar-actions .role-badge{display:none;}
+      .comments-drawer{width:100%;}
+      .scroll-area{padding:8px 4px;gap:6px;}
+    }
+    @media(max-width:600px){
+      .topbar-zoom{display:none;}
+      .book-topbar{gap:4px;}
+      .topbar-sep{display:none;}
+      .topbar-actions select{max-width:80px;font-size:.62rem;}
+      .topbar-btn{padding:0 6px;font-size:.65rem;}
+      .topbar-title{font-size:.7rem;max-width:90px;}
+      .scroll-area{padding:6px 2px;gap:4px;}
+      .page-bar{height:28px;font-size:.7rem;}
+      .page-bar input{width:36px;font-size:.7rem;}
+      /* Reduce page body padding for smaller scaled text */
+      .page-body{padding:20px 55px;}
+      .page-header-bar{padding:0 55px;}
+      /* Make diagrams more compact on mobile */
+      .page-body .diagram-container{padding:10px;margin:8px 0;}
+      .page-body .diagram-box{padding:8px;}
+      .page-body .diagram-box h4{font-size:.78rem;}
+      .page-body .diagram-box p{font-size:.72rem;}
+      .page-body .diagram-header{font-size:.84rem;margin-bottom:6px;}
+      .page-body .diagram-flow .diagram-box{min-width:50px;}
+      .page-body .diagram-arrow{font-size:.85rem;}
+      /* Disable drop-cap on mobile */
+      .page-body.chapter-start .drop-cap::first-letter{
+        font-size:inherit !important;float:none !important;padding:0 !important;
+        line-height:inherit !important;
+      }
+    }
+    @media(max-width:380px){
+      .topbar-actions select{display:none;}
+      .topbar-title{max-width:60px;}
     }
   </style>
 </head>
-<body>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;color:#fff;text-decoration:none;">
-        <span style="font-size:20px;">←</span>
-        <img src="youtube logo.png" alt="HRC" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
-      </a>
-      <div>
-        <h2 id="bookTitle" style="font-size:1rem;color:#fff;">Loading...</h2>
-        <span id="bookStatus" class="badge badge-draft" style="font-size:0.65rem;">Draft</span>
-      </div>
+<body class="book-body">
+
+  <!-- LOADER -->
+  <div class="book-loader" id="bookLoader">
+    <div class="loader-content">
+      <div class="loader-icon">📖</div>
+      <div class="loader-title">Opening Book...</div>
+      <div class="loader-dots"><span></span><span></span><span></span></div>
     </div>
-    <div class="navbar-actions">
-      <select id="statusSelect" class="btn btn-sm btn-secondary" style="cursor:pointer;appearance:auto;padding:6px 12px;" onchange="changeStatus(this.value)">
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="book-topbar">
+    <a href="dashboard.html" class="topbar-back">
+      <span style="font-size:16px;">←</span>
+      <img src="youtube logo.png" alt="HRC" class="topbar-logo">
+    </a>
+    <span class="topbar-title" id="bookTitle">Loading...</span>
+    <span id="bookStatus" class="badge badge-draft" style="font-size:.58rem;flex-shrink:0;">Draft</span>
+    <div class="topbar-sep"></div>
+    <div class="topbar-zoom">
+      <button class="zoom-btn" onclick="zoomOut()" title="Zoom out">−</button>
+      <span class="zoom-label" id="zoomLabel">100%</span>
+      <button class="zoom-btn" onclick="zoomIn()" title="Zoom in">+</button>
+    </div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-actions">
+      <select id="statusSelect" onchange="changeStatus(this.value)">
         <option value="draft">📝 Draft</option>
         <option value="in-review">🔍 In Review</option>
-        <option value="revision">🔄 Needs Revision</option>
+        <option value="revision">🔄 Revision</option>
         <option value="approved">✅ Approved</option>
       </select>
-      <button class="btn btn-sm btn-secondary" onclick="toggleComments()">💬 Comments</button>
-      <button class="btn btn-sm btn-secondary" onclick="showVersions()" style="display:none;">📋 Versions</button>
+      <button class="topbar-btn" onclick="toggleTOC()">📑 Contents</button>
+      <button class="topbar-btn" onclick="toggleComments()">💬 Chat</button>
       <span class="role-badge" id="roleBadge"></span>
     </div>
-  </nav>
+  </div>
 
-  <!-- Reader Layout -->
-  <div class="reader-layout">
+  <!-- BOOK VIEWER -->
+  <div class="book-viewer">
+    <!-- Sidebar -->
+    <div class="page-sidebar" id="pageSidebar"></div>
 
-    <!-- Chapter Sidebar -->
-    <div class="chapter-sidebar" id="chapterSidebar">
-      <h3>Chapters</h3>
-      <ul class="chapter-list" id="chapterList"></ul>
-    </div>
+    <!-- Scroll Area (pages rendered here) -->
+    <div class="scroll-area" id="scrollArea"></div>
+  </div>
 
-    <!-- Main Content -->
-    <div class="reader-main" id="readerContent">
-      <div style="text-align:center;padding:100px 0;color:var(--gray-400);">
-        <p style="font-size:3rem;margin-bottom:16px;">📖</p>
-        <p>Select a chapter to begin reading</p>
-      </div>
-    </div>
+  <!-- PAGE BAR -->
+  <div class="page-bar">
+    <span>Page</span>
+    <input type="number" id="pageInput" min="1" value="1"
+      onchange="goToPage(parseInt(this.value))"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();goToPage(parseInt(this.value));}">
+    <span>of <strong id="totalPages">0</strong></span>
+  </div>
 
-    <!-- Comments Panel -->
-    <div class="comments-panel" id="commentsPanel">
-      <div class="comments-header" style="background:#075e54;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem;">💬</div>
-          <div>
-            <h3 style="font-size:0.88rem;color:#fff;font-family:var(--font-body);margin:0;font-weight:600;">Review Chat</h3>
-            <span style="font-size:0.68rem;color:rgba(255,255,255,0.7);display:block;margin-top:1px;">Emma & CEO</span>
-          </div>
-        </div>
-        <button onclick="toggleComments()" style="width:32px;height:32px;font-size:14px;background:none;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+  <!-- TOC MODAL -->
+  <div class="toc-modal" id="tocModal" onclick="if(event.target===this)toggleTOC()">
+    <div class="toc-panel">
+      <div class="toc-head">
+        <h2>📖 Table of Contents</h2>
+        <button class="toc-close" onclick="toggleTOC()">✕</button>
       </div>
-      
-      <div id="commentsList"></div>
-      
-      <!-- Quote Reply Preview -->
-      <div id="replyPreviewBar" style="background:rgba(0,0,0,0.03);border-left:3px solid var(--gold);padding:6px 12px;font-size:0.75rem;display:none;align-items:center;justify-content:space-between;border-top:1px solid var(--border);">
-        <div id="replyPreviewText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;font-style:italic;color:var(--text-secondary);">Replying to paragraph...</div>
-        <button onclick="clearReplyQuote()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-muted);padding-left:8px;">✕</button>
-      </div>
-      
-      <div class="chat-input-container">
-        <button class="chat-action-btn" id="voiceCommentBtn" onclick="toggleVoicePanel()" title="Voice note">🎤</button>
-        <input type="text" id="commentText" placeholder="Type a message..." class="chat-input-field" onkeydown="handleChatKey(event)">
-        <button class="chat-send-btn" onclick="submitComment()" title="Send">✈️</button>
-      </div>
+      <div class="toc-list" id="tocList"></div>
     </div>
   </div>
 
-  <!-- Voice Recorder -->
-  <div class="voice-recorder" id="voiceRecorder">
-    <div class="voice-panel" id="voicePanel">
-      <button class="voice-panel-close" onclick="closeVoicePanel()" title="Close">✕</button>
-      <h3 style="font-size:0.9rem;margin-bottom:8px;">🎤 Voice Note</h3>
+  <!-- COMMENTS BACKDROP -->
+  <div class="comments-backdrop" id="commentsBackdrop" onclick="toggleComments()"></div>
+
+  <!-- COMMENTS DRAWER -->
+  <div class="comments-drawer" id="commentsDrawer">
+    <div class="comments-drawer-header">
+      <div>
+        <h3>💬 Review Chat</h3>
+        <span>Emma & CEO - <em id="drawerChapterLabel">Chapter 1</em></span>
+      </div>
+      <button class="drawer-close-btn" onclick="toggleComments()">✕</button>
+    </div>
+    <div class="comments-list" id="commentsList"></div>
+    <div class="voice-mini-panel" id="voiceMiniPanel" style="display:none;">
       <div class="voice-timer" id="voiceTimer">00:00</div>
-      <div class="voice-controls">
-        <button class="btn btn-sm btn-primary" id="recordBtn" onclick="toggleRecording()">Start Recording</button>
-        <button class="btn btn-sm btn-secondary" id="stopBtn" onclick="stopAndSave()" style="display:none;">Save</button>
-      </div>
-      <div id="voiceNotesList" style="margin-top:12px;max-height:150px;overflow-y:auto;"></div>
+      <button class="rec-btn" id="recordBtn" onclick="toggleRecording()">⏺ Record</button>
+      <button class="save-btn" id="stopSaveBtn" onclick="stopAndSave()" style="display:none;">💾 Save</button>
+      <button class="close-voice" onclick="closeVoicePanel()">✕</button>
     </div>
-    <button class="voice-btn" id="voiceMainBtn" onclick="toggleVoicePanel()">🎤</button>
-  </div>
-
-  <!-- Version Modal -->
-  <div class="modal-overlay" id="versionModal">
-    <div class="modal">
-      <h2>📋 Version History</h2>
-      <div id="versionList" class="version-timeline"></div>
-      <div class="modal-actions">
-        <button class="btn btn-sm btn-secondary" onclick="addVersion()">+ Add Version Note</button>
-        <button class="btn btn-sm btn-primary" onclick="closeVersions()">Close</button>
-      </div>
+    <div class="comments-input">
+      <button class="mic-btn" onclick="toggleVoicePanel()" title="Voice note">🎤</button>
+      <input type="text" id="commentText" placeholder="Type a message..."
+        onkeydown="if(event.key==='Enter'){event.preventDefault();submitComment();}">
+      <button class="send-btn" onclick="submitComment()" title="Send">✈️</button>
     </div>
   </div>
 
+  <!-- TOAST -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Firebase SDKs -->
+  <!-- SCRIPTS -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="js/firebase-config.js?v=1.3"></script>
   <script src="js/db.js?v=1.3"></script>
-  <script src="js/books-data.js?v=1.3"></script>
-  <script src="js/ceo-feedback-retriever.js?v=1.0"></script>
-  <script>
-    // ---- Auth ----
-    const role = sessionStorage.getItem('hrc_role');
-    if (!role || sessionStorage.getItem('hrc_loggedIn') !== 'true') {
-      window.location.href = 'index.html';
-    }
-    const roleBadge = document.getElementById('roleBadge');
-    roleBadge.textContent = (role === 'author' || role === 'Emma') ? '✍️ Emma' : '📋 CEO';
-    roleBadge.className = 'role-badge ' + ((role === 'author' || role === 'Emma') ? 'role-author' : 'role-reviewer');
+  <script src="js/books-data.js?v=1.4"></script>
 
-    // ---- Get Book ID ----
-    const urlParams = new URLSearchParams(window.location.search);
-    const bookId = urlParams.get('book');
+  <script>
+    /* ========== AUTH ========== */
+    const role = sessionStorage.getItem('hrc_role');
+    if (!role || sessionStorage.getItem('hrc_loggedIn') !== 'true') window.location.href = 'index.html';
+    const isEmma = role === 'author' || role === 'Emma';
+    const roleBadge = document.getElementById('roleBadge');
+    roleBadge.textContent = isEmma ? '✍️ Emma' : '📋 CEO';
+    roleBadge.className = 'role-badge ' + (isEmma ? 'role-author' : 'role-reviewer');
+
+    const bookId = new URLSearchParams(window.location.search).get('book');
     if (!bookId) window.location.href = 'dashboard.html';
 
-    let currentChapter = null;
+    /* ========== STATE ========== */
+    let allPages = [];
+    let currentPage = 0;
     let bookChapters = [];
+    let chapterPageMap = [];
+    let bookMeta = {};
+    let zoomLevel = 1.0;
+    let resizeTimer = null;
+    const PAGE_W = 700, PAGE_H = 960;
 
-    // ---- Load Book ----
+    /* ========== LOAD BOOK ========== */
     async function loadBook() {
       const books = DB.getBooks().length ? DB.getBooks() : BOOKS_DATA;
-      const bookMeta = books.find(b => b.id === bookId);
+      bookMeta = books.find(b => b.id === bookId);
       if (!bookMeta) { window.location.href = 'dashboard.html'; return; }
 
       document.getElementById('bookTitle').textContent = bookMeta.title;
       document.title = bookMeta.title + ' | Homers Research Consult';
-
-      const statusClass = bookMeta.status === 'in-review' ? 'review' : bookMeta.status;
-      const statusEl = document.getElementById('bookStatus');
-      statusEl.textContent = bookMeta.status === 'in-review' ? 'In Review' : bookMeta.status.charAt(0).toUpperCase() + bookMeta.status.slice(1);
-      statusEl.className = 'badge badge-' + statusClass;
+      const sc = bookMeta.status === 'in-review' ? 'review' : bookMeta.status;
+      const se = document.getElementById('bookStatus');
+      se.textContent = bookMeta.status === 'in-review' ? 'In Review' : bookMeta.status.charAt(0).toUpperCase() + bookMeta.status.slice(1);
+      se.className = 'badge badge-' + sc;
       document.getElementById('statusSelect').value = bookMeta.status;
 
-      // Try loading book JSON
       try {
-        const resp = await fetch(`books/${bookId}.json`);
+        const resp = await fetch('books/' + bookId + '.json');
         if (resp.ok) {
           const data = await resp.json();
           bookChapters = data.chapters || [];
-          renderChapterList();
-          if (bookChapters.length > 0) selectChapter(0);
-        } else {
-          showPlaceholder();
-        }
-      } catch (e) {
-        showPlaceholder();
-      }
+          bookMeta.subtitle = data.subtitle || '';
+        } else { makePlaceholder(); }
+      } catch(e) { makePlaceholder(); }
+
+      await document.fonts.ready;
+      await paginateBook();
+      renderAllPages();
+      renderSidebar();
+      renderTOC();
+      setupScrollTracking();
+      autoZoom();
+      setTimeout(() => document.getElementById('bookLoader').classList.add('hidden'), 350);
     }
 
-    function showPlaceholder() {
-      // Generate placeholder chapters
-      const bookMeta = (DB.getBooks().length ? DB.getBooks() : BOOKS_DATA).find(b => b.id === bookId);
-      const count = bookMeta ? bookMeta.chapters : 10;
+    function makePlaceholder() {
+      const n = bookMeta.chapters || 10;
       bookChapters = [];
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < n; i++) {
         bookChapters.push({
-          id: `ch-${String(i + 1).padStart(2, '0')}`,
-          title: `Chapter ${i + 1}`,
-          content: `<p style="color:var(--gray-500);text-align:center;padding:80px 0;">📝 This chapter has not been written yet.<br>Content will appear here once the author publishes it.</p>`
+          id: 'ch-' + String(i+1).padStart(2,'0'),
+          title: 'Chapter ' + (i+1),
+          content: '<h1>Chapter ' + (i+1) + '</h1><p style="color:#999;text-align:center;padding:80px 0;">📝 This chapter has not been written yet.<br>Content will appear here once the author publishes it.</p>'
         });
       }
-      renderChapterList();
-      selectChapter(0);
     }
 
-    // ---- Chapter List ----
-    function renderChapterList() {
-      const list = document.getElementById('chapterList');
-      list.innerHTML = '';
-      bookChapters.forEach((ch, i) => {
-        const status = DB.getChapterStatus(bookId, ch.id);
-        const comments = DB.getComments(bookId, ch.id).filter(c => !c.resolved);
-        const li = document.createElement('li');
-        li.className = 'chapter-item' + (i === 0 ? ' active' : '');
-        li.onclick = () => selectChapter(i);
-        li.innerHTML = `
-          <span class="ch-status ${status}"></span>
-          <span style="flex:1">${ch.title}</span>
-          ${comments.length > 0 ? `<span style="font-size:0.7rem;color:var(--orange);">${comments.length}</span>` : ''}
-        `;
-        list.appendChild(li);
+    /* ========== PAGINATION ENGINE ========== */
+    async function paginateBook() {
+      const m = document.createElement('div');
+      m.style.cssText = 'position:absolute;visibility:hidden;left:-9999px;width:570px;padding:0;font-family:Inter,-apple-system,sans-serif;font-size:.88rem;line-height:1.78;color:#333;';
+      m.className = 'page-body';
+      document.body.appendChild(m);
+
+      const MAX_H = 700;
+      allPages = [];
+      chapterPageMap = [];
+
+      const blocks = [];
+      let prevPart = '';
+      bookChapters.forEach((ch, ci) => {
+        if (ch.part && ch.part !== prevPart) {
+          prevPart = ch.part;
+          const pm = ch.part.match(/PART\s+(\w+):\s*(.*)/i);
+          const pLabel = pm ? 'Part ' + pm[1] : ch.part;
+          const pName  = pm ? pm[2] : ch.part;
+          blocks.push({
+            html:'<div class="part-title-page"><div class="part-label">' + pLabel + '</div><div class="part-rule"></div><div class="part-name">' + pName + '</div></div>',
+            ci, chTitle:ch.title, chId:ch.id, isPartTitle:true, isChStart:false, forceNew:true
+          });
+        }
+        const tmp = document.createElement('div');
+        tmp.innerHTML = ch.content;
+        Array.from(tmp.children).forEach((el,bi) => {
+          blocks.push({ html:el.outerHTML, ci, chTitle:ch.title, chId:ch.id, isPartTitle:false, isChStart:bi===0, forceNew:bi===0 });
+        });
+      });
+
+      const wrappers = [];
+      blocks.forEach(b => {
+        const w = document.createElement('div');
+        w.style.overflow = 'hidden';
+        w.innerHTML = b.html;
+        m.appendChild(w);
+        wrappers.push(w);
+      });
+
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const heights = wrappers.map(w => w.offsetHeight || 30);
+
+      let curEls = [], curH = 0, lastCI = -1;
+      function pushPage(ci) {
+        const ref = blocks.find(b => b.ci === ci) || blocks[blocks.length-1];
+        allPages.push({
+          elements:[...curEls], chapterIndex:ci, chapterTitle:ref.chTitle, chapterId:ref.chId,
+          isPartTitle: curEls.length===1 && curEls[0].includes('part-title-page')
+        });
+        curEls = []; curH = 0;
+      }
+
+      blocks.forEach((b, i) => {
+        const h = Math.max(heights[i], 15);
+        if (b.forceNew && curEls.length > 0) pushPage(lastCI);
+        if (b.isChStart) chapterPageMap.push(allPages.length + (curEls.length===0?0:1));
+        if (curH + h > MAX_H && curEls.length > 0) pushPage(b.ci);
+        if (h > MAX_H && curEls.length === 0) { curEls.push(b.html); pushPage(b.ci); lastCI=b.ci; return; }
+        curEls.push(b.html);
+        curH += h;
+        lastCI = b.ci;
+      });
+      if (curEls.length > 0) pushPage(lastCI);
+
+      /* Title page */
+      const bd = BOOKS_DATA.find(x => x.id === bookId) || {};
+      allPages.unshift({
+        elements:['<div class="book-title-page">' +
+          '<div class="title-page-cat">' + (bd.type||'Academic Research').toUpperCase() + ' - BOOK ' + (bd.number||'') + ' OF 10</div>' +
+          '<div class="title-page-title">' + (bookMeta.title||'Untitled') + '</div>' +
+          '<div class="title-page-subtitle">' + (bookMeta.subtitle||bookMeta.description||'') + '</div>' +
+          '<div class="title-page-rule"></div>' +
+          '<div class="title-page-author">Homers Research Consult</div>' +
+          '<div class="title-page-pub">HRC Press - Accra</div></div>'],
+        chapterIndex:-1, chapterTitle:bookMeta.title, chapterId:'title', isTitlePage:true
+      });
+      chapterPageMap = chapterPageMap.map(p => p + 1);
+
+      document.body.removeChild(m);
+      document.getElementById('totalPages').textContent = allPages.length;
+      document.getElementById('pageInput').max = allPages.length;
+    }
+
+    /* ========== RENDER ALL PAGES ========== */
+    function renderAllPages() {
+      const area = document.getElementById('scrollArea');
+      area.innerHTML = '';
+
+      allPages.forEach((page, i) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'page-wrapper';
+        wrapper.id = 'pw-' + i;
+        wrapper.style.width = (PAGE_W * zoomLevel) + 'px';
+        wrapper.style.height = (PAGE_H * zoomLevel) + 'px';
+
+        const pg = document.createElement('div');
+        pg.className = 'book-page';
+        pg.setAttribute('data-page', i);
+        pg.style.transform = 'scale(' + zoomLevel + ')';
+
+        /* Header */
+        const hdr = document.createElement('div');
+        hdr.className = 'page-header-bar';
+        if (!page.isTitlePage && !page.isPartTitle) {
+          const short = (page.chapterTitle||'').replace(/^Chapter\s+\d+:\s*/i,'');
+          hdr.innerHTML = '<span class="hdr-left">' + (bookMeta.title||'') + '</span><span class="hdr-right">' + short.toUpperCase().substring(0,45) + '</span>';
+        }
+        pg.appendChild(hdr);
+
+        /* Body */
+        const body = document.createElement('div');
+        const isCStart = chapterPageMap.includes(i);
+        body.className = 'page-body' + (isCStart ? ' chapter-start' : '');
+        body.innerHTML = page.elements.join('');
+        if (isCStart) {
+          const allP = body.querySelectorAll(':scope > p');
+          for (const p of allP) { if (p.textContent.trim().length > 40) { p.classList.add('drop-cap'); break; } }
+        }
+        pg.appendChild(body);
+
+        /* Footer */
+        const ftr = document.createElement('div');
+        ftr.className = 'page-footer-bar';
+        ftr.textContent = (page.isTitlePage || page.isPartTitle) ? '' : String(i + 1);
+        pg.appendChild(ftr);
+
+        wrapper.appendChild(pg);
+        area.appendChild(wrapper);
       });
     }
 
-    // ---- Select Chapter ----
-    function selectChapter(index) {
-      currentChapter = index;
-      const ch = bookChapters[index];
+    /* ========== SIDEBAR ========== */
+    function renderSidebar() {
+      const sb = document.getElementById('pageSidebar');
+      sb.innerHTML = '';
+      allPages.forEach((_, i) => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item' + (i === 0 ? ' active' : '');
+        item.setAttribute('data-page', i);
+        item.onclick = () => scrollToPage(i);
 
-      // Update active state
-      document.querySelectorAll('.chapter-item').forEach((el, i) => {
-        el.className = 'chapter-item' + (i === index ? ' active' : '');
+        const num = document.createElement('div');
+        num.className = 'sidebar-item-num';
+        num.textContent = i + 1;
+        item.appendChild(num);
+
+        sb.appendChild(item);
       });
+    }
 
-      // Render content with commentable paragraphs
-      const content = document.getElementById('readerContent');
-      let html = ch.content;
+    function highlightSidebar(idx) {
+      document.querySelectorAll('.sidebar-item').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+      /* scroll sidebar to show active item */
+      const active = document.querySelector('.sidebar-item.active');
+      if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
 
-      // Wrap paragraphs in commentable divs
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = html;
-      let finalHtml = '';
-      let pIndex = 0;
-
-      wrapper.childNodes.forEach(node => {
-        if (node.nodeType === 1) {
-          const tag = node.tagName.toLowerCase();
-          if (['p', 'blockquote', 'ul', 'ol', 'table'].includes(tag)) {
-            const comments = DB.getComments(bookId, ch.id).filter(c => c.paragraphIndex === pIndex && !c.resolved);
-            const hasComments = comments.length > 0;
-            finalHtml += `<div class="commentable ${hasComments ? 'has-comments' : ''}" data-p="${pIndex}">
-              ${node.outerHTML}
-              <button class="comment-trigger" onclick="openCommentFor(${pIndex})" title="Add comment">
-                💬
-                ${hasComments ? `<span class="comment-count-badge">${comments.length}</span>` : ''}
-              </button>
-            </div>`;
-            pIndex++;
-          } else {
-            finalHtml += node.outerHTML;
-          }
+    /* ========== SCROLL TRACKING ========== */
+    function setupScrollTracking() {
+      const area = document.getElementById('scrollArea');
+      let ticking = false;
+      area.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const scrollCenter = area.scrollTop + area.clientHeight / 2;
+            let closest = 0, closestDist = Infinity;
+            document.querySelectorAll('.page-wrapper').forEach((pw, i) => {
+              const mid = pw.offsetTop + pw.offsetHeight / 2;
+              const d = Math.abs(mid - scrollCenter);
+              if (d < closestDist) { closestDist = d; closest = i; }
+            });
+            if (closest !== currentPage) {
+              currentPage = closest;
+              document.getElementById('pageInput').value = currentPage + 1;
+              highlightSidebar(currentPage);
+            }
+            ticking = false;
+          });
+          ticking = true;
         }
       });
-
-      content.innerHTML = finalHtml || html;
-      content.scrollTop = 0;
-      loadComments();
-      loadVoiceNotes();
     }
 
-    // ---- Comments ----
-    function loadComments() {
-      if (!bookChapters[currentChapter]) return;
-      const ch = bookChapters[currentChapter];
-      const comments = DB.getComments(bookId, ch.id);
-      const voiceNotes = DB.getVoiceNotes(bookId, ch.id).map(vn => ({ ...vn, isVoice: true }));
-      const allItems = [...comments, ...voiceNotes].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    /* ========== NAVIGATION ========== */
+    function scrollToPage(idx) {
+      const pw = document.getElementById('pw-' + idx);
+      if (pw) pw.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function goToPage(n) {
+      if (n >= 1 && n <= allPages.length) scrollToPage(n - 1);
+    }
 
-      const list = document.getElementById('commentsList');
-      if (allItems.length === 0) {
-        list.innerHTML = '<p style="padding:40px 20px;text-align:center;color:var(--gray-500);font-size:0.85rem;background:transparent;">No messages on this chapter yet. Send a message or click a paragraph 💬 icon to reference it.</p>';
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+      if (e.key==='Escape') { closeTOC(); closeComments(); }
+    });
+
+    /* ========== ZOOM ========== */
+    function zoomIn() { zoomLevel = Math.min(2.0, +(zoomLevel + 0.1).toFixed(1)); applyZoom(); }
+    function zoomOut() { zoomLevel = Math.max(0.5, +(zoomLevel - 0.1).toFixed(1)); applyZoom(); }
+    function applyZoom() {
+      document.getElementById('zoomLabel').textContent = Math.round(zoomLevel * 100) + '%';
+      const w = Math.round(PAGE_W * zoomLevel);
+      const h = Math.round(PAGE_H * zoomLevel);
+      document.querySelectorAll('.page-wrapper').forEach(pw => {
+        pw.style.width = w + 'px';
+        pw.style.height = h + 'px';
+      });
+      document.querySelectorAll('.book-page').forEach(pg => {
+        pg.style.transform = 'scale(' + zoomLevel + ')';
+      });
+    }
+
+    /* ========== AUTO ZOOM (mobile fit) ========== */
+    function autoZoom() {
+      const area = document.getElementById('scrollArea');
+      if (!area) return;
+      const areaWidth = area.clientWidth;
+      if (areaWidth < PAGE_W + 20) {
+        zoomLevel = Math.max(0.3, (areaWidth - 8) / PAGE_W);
+        zoomLevel = +zoomLevel.toFixed(2);
+        applyZoom();
+      }
+    }
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(autoZoom, 200);
+    });
+    window.addEventListener('orientationchange', () => {
+      setTimeout(autoZoom, 300);
+    });
+
+    /* ========== TOC ========== */
+    function renderTOC() {
+      const list = document.getElementById('tocList');
+      let curPart = '';
+      list.innerHTML = bookChapters.map((ch, i) => {
+        let ph = '';
+        if (ch.part && ch.part !== curPart) { curPart = ch.part; ph = '<div class="toc-part">' + ch.part + '</div>'; }
+        const pg = chapterPageMap[i] !== undefined ? chapterPageMap[i] + 1 : '-';
+        return ph + '<div class="toc-item" onclick="goToChapter(' + i + ')"><span>' + ch.title + '</span><span class="toc-page-num">p. ' + pg + '</span></div>';
+      }).join('');
+    }
+    function goToChapter(ci) { if (chapterPageMap[ci] !== undefined) { scrollToPage(chapterPageMap[ci]); closeTOC(); } }
+    function toggleTOC() { document.getElementById('tocModal').classList.toggle('show'); }
+    function closeTOC() { document.getElementById('tocModal').classList.remove('show'); }
+
+    /* ========== COMMENTS ========== */
+    function toggleComments() {
+      const d = document.getElementById('commentsDrawer'), b = document.getElementById('commentsBackdrop');
+      d.classList.toggle('show'); b.classList.toggle('show');
+      if (d.classList.contains('show')) loadComments();
+    }
+    function closeComments() { document.getElementById('commentsDrawer').classList.remove('show'); document.getElementById('commentsBackdrop').classList.remove('show'); }
+
+    function getCurrentChId() { return allPages[currentPage] ? allPages[currentPage].chapterId : null; }
+    function getCurrentChTitle() { return allPages[currentPage] ? allPages[currentPage].chapterTitle || '' : ''; }
+
+    function loadComments() {
+      const chId = getCurrentChId();
+      document.getElementById('drawerChapterLabel').textContent = getCurrentChTitle() || 'General';
+      if (!chId || chId === 'title') {
+        document.getElementById('commentsList').innerHTML = '<p style="padding:40px 16px;text-align:center;color:#8696a0;font-size:.84rem;">Navigate to a chapter to view and send comments.</p>';
         return;
       }
-
-      list.innerHTML = allItems.map(item => {
-        const isOutgoing = item.role === role;
-        const senderName = (item.role === 'reviewer' || item.role === 'CEO') ? 'CEO' : 'Emma';
-        
-        let contentHtml = '';
-        if (item.isVoice) {
-          contentHtml = `
-            <div style="margin-top:4px;">
-              <audio controls src="${item.audioData}" style="width:100%;height:32px;border-radius:4px;outline:none;"></audio>
-            </div>
-          `;
-        } else {
-          contentHtml = `<p style="margin:2px 0 0;font-size:0.86rem;word-break:break-word;">${escapeHtml(item.text)}</p>`;
-        }
-        
-        const quoteHtml = item.paragraphText 
-          ? `<div class="chat-quote" title="${escapeHtml(item.paragraphText)}">"${escapeHtml(item.paragraphText.substring(0, 50))}..."</div>`
-          : '';
-
-        return `
-          <div class="chat-row ${isOutgoing ? 'outgoing' : 'incoming'}">
-            <div class="chat-bubble">
-              <span class="chat-sender-name">${senderName}</span>
-              ${quoteHtml}
-              ${contentHtml}
-              <span class="chat-time">${formatDate(item.timestamp)}</span>
-            </div>
-          </div>
-        `;
+      const comments = DB.getComments(bookId, chId) || [];
+      const vn = (DB.getVoiceNotes ? (DB.getVoiceNotes(bookId, chId) || []) : []).map(v => ({...v, isVoice:true}));
+      const items = [...comments, ...vn].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+      const list = document.getElementById('commentsList');
+      if (!items.length) {
+        list.innerHTML = '<p style="padding:40px 16px;text-align:center;color:#8696a0;font-size:.84rem;">No messages on this chapter yet.</p>';
+        return;
+      }
+      list.innerHTML = items.map(item => {
+        const out = item.role === role;
+        const name = (item.role === 'reviewer' || item.role === 'CEO') ? 'CEO' : 'Emma';
+        const content = item.isVoice
+          ? '<div style="margin-top:3px;"><audio controls src="' + item.audioData + '" style="width:100%;height:30px;"></audio></div>'
+          : '<p style="margin:2px 0 0;font-size:.84rem;word-break:break-word;">' + escapeHtml(item.text) + '</p>';
+        return '<div class="chat-row ' + (out?'outgoing':'incoming') + '"><div class="chat-bubble"><span class="chat-sender-name">' + name + '</span>' + content + '<span class="chat-time">' + formatDate(item.timestamp) + '</span></div></div>';
       }).join('');
-
-      // Auto scroll to bottom
-      setTimeout(() => {
-        list.scrollTop = list.scrollHeight;
-      }, 50);
-    }
-
-    function openCommentFor(pIndex) {
-      const panel = document.getElementById('commentsPanel');
-      panel.classList.remove('hidden');
-      
-      const textEl = document.getElementById('commentText');
-      textEl.focus();
-      textEl.dataset.paragraphIndex = pIndex;
-
-      const commentable = document.querySelector(`[data-p="${pIndex}"]`);
-      if (commentable) {
-        const text = commentable.textContent.trim();
-        textEl.dataset.paragraphText = text;
-        
-        document.getElementById('replyPreviewText').textContent = `Reply to: "${text.substring(0, 45)}..."`;
-        document.getElementById('replyPreviewBar').style.display = 'flex';
-      }
-    }
-
-    function clearReplyQuote() {
-      const textEl = document.getElementById('commentText');
-      textEl.dataset.paragraphIndex = '';
-      textEl.dataset.paragraphText = '';
-      document.getElementById('replyPreviewBar').style.display = 'none';
-    }
-
-    function handleChatKey(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        submitComment();
-      }
+      setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
     }
 
     function submitComment() {
-      const textEl = document.getElementById('commentText');
-      const text = textEl.value.trim();
-      if (!text) return;
-
-      const ch = bookChapters[currentChapter];
-      DB.addComment(bookId, ch.id, {
-        text,
-        role,
-        paragraphIndex: textEl.dataset.paragraphIndex ? parseInt(textEl.dataset.paragraphIndex) : null,
-        paragraphText: textEl.dataset.paragraphText || '',
-        resolved: false
-      });
-
-      textEl.value = '';
-      clearReplyQuote();
-      selectChapter(currentChapter);
+      const el = document.getElementById('commentText'), txt = el.value.trim(), chId = getCurrentChId();
+      if (!txt || !chId || chId === 'title') return;
+      DB.addComment(bookId, chId, { text:txt, role, paragraphIndex:null, paragraphText:'', resolved:false });
+      el.value = '';
+      loadComments();
       showToast('Message sent', 'success');
     }
 
-    function resolveComment(commentId) {
-      const ch = bookChapters[currentChapter];
-      DB.resolveComment(bookId, ch.id, commentId);
-      selectChapter(currentChapter);
-      showToast('Comment resolved', 'success');
+    /* ========== VOICE ========== */
+    let mediaRec=null, audioChunks=[], recTimer=null, recSec=0;
+    function toggleVoicePanel() { const p = document.getElementById('voiceMiniPanel'); p.style.display = p.style.display==='none'?'flex':'none'; }
+    function closeVoicePanel() { if (mediaRec && mediaRec.state!=='inactive') mediaRec.stop(); document.getElementById('voiceMiniPanel').style.display='none'; resetVoiceUI(); }
+    function resetVoiceUI() {
+      document.getElementById('recordBtn').textContent='⏺ Record'; document.getElementById('recordBtn').className='rec-btn';
+      document.getElementById('stopSaveBtn').style.display='none'; document.getElementById('voiceTimer').textContent='00:00';
+      clearInterval(recTimer); recSec=0;
     }
-
-    function replyToComment(commentId) {
-      const replyText = prompt('Your reply:');
-      if (!replyText) return;
-      const ch = bookChapters[currentChapter];
-      DB.addReply(bookId, ch.id, commentId, { text: replyText, role });
-      loadComments();
-      showToast('Reply posted', 'success');
-    }
-
-    function toggleComments() {
-      const panel = document.getElementById('commentsPanel');
-      panel.classList.toggle('hidden');
-      // On mobile, prevent body scroll when chat is open
-      if (!panel.classList.contains('hidden')) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
-      }
-    }
-
-    // ---- Status ----
-    function changeStatus(newStatus) {
-      DB.updateBookStatus(bookId, newStatus);
-      const statusClass = newStatus === 'in-review' ? 'review' : newStatus;
-      const statusEl = document.getElementById('bookStatus');
-      statusEl.textContent = newStatus === 'in-review' ? 'In Review' : newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-      statusEl.className = 'badge badge-' + statusClass;
-      showToast('Status updated to ' + newStatus, 'success');
-    }
-
-    // ---- Versions ----
-    function showVersions() {
-      document.getElementById('versionModal').classList.add('show');
-      const versions = DB.getVersions(bookId);
-      const list = document.getElementById('versionList');
-      if (versions.length === 0) {
-        list.innerHTML = '<p style="color:var(--gray-500);text-align:center;padding:20px;">No versions recorded yet.</p>';
-        return;
-      }
-      list.innerHTML = versions.map(v => `
-        <div class="version-item">
-          <div class="version-dot"></div>
-          <div class="version-info">
-            <h4>Version ${v.number}</h4>
-            <p>${v.notes || 'No notes'}</p>
-            <p style="font-size:0.72rem;color:var(--gray-500);">${formatDate(v.timestamp)}</p>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function addVersion() {
-      const notes = prompt('Version notes (what changed?):');
-      if (!notes) return;
-      DB.addVersion(bookId, { notes });
-      showVersions();
-      showToast('Version recorded', 'success');
-    }
-
-    function closeVersions() {
-      document.getElementById('versionModal').classList.remove('show');
-    }
-
-    // ---- Voice Recording ----
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let recordingTimer = null;
-    let recordingSeconds = 0;
-
-    function toggleVoicePanel() {
-      document.getElementById('voicePanel').classList.toggle('show');
-    }
-
-    function closeVoicePanel() {
-      document.getElementById('voicePanel').classList.remove('show');
-    }
-
     async function toggleRecording() {
-      const btn = document.getElementById('recordBtn');
-      const stopBtn = document.getElementById('stopBtn');
-      const mainBtn = document.getElementById('voiceMainBtn');
-
-      if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+      const btn=document.getElementById('recordBtn'), sb=document.getElementById('stopSaveBtn');
+      if (!mediaRec || mediaRec.state==='inactive') {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-
-          mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-          mediaRecorder.onstop = () => {
-            stream.getTracks().forEach(t => t.stop());
-            clearInterval(recordingTimer);
-          };
-
-          mediaRecorder.start();
-          recordingSeconds = 0;
-          recordingTimer = setInterval(() => {
-            recordingSeconds++;
-            const m = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
-            const s = String(recordingSeconds % 60).padStart(2, '0');
-            document.getElementById('voiceTimer').textContent = m + ':' + s;
-          }, 1000);
-
-          btn.textContent = '⏸ Pause';
-          btn.style.background = 'var(--red)';
-          btn.style.color = 'white';
-          stopBtn.style.display = 'inline-flex';
-          mainBtn.classList.add('recording');
-        } catch (e) {
-          showToast('Microphone access denied', 'error');
-        }
-      } else if (mediaRecorder.state === 'recording') {
-        mediaRecorder.pause();
-        btn.textContent = '▶ Resume';
-        btn.style.background = '';
-        btn.style.color = '';
-        clearInterval(recordingTimer);
-      } else if (mediaRecorder.state === 'paused') {
-        mediaRecorder.resume();
-        btn.textContent = '⏸ Pause';
-        btn.style.background = 'var(--red)';
-        btn.style.color = 'white';
-        recordingTimer = setInterval(() => {
-          recordingSeconds++;
-          const m = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
-          const s = String(recordingSeconds % 60).padStart(2, '0');
-          document.getElementById('voiceTimer').textContent = m + ':' + s;
-        }, 1000);
+          const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+          mediaRec=new MediaRecorder(stream); audioChunks=[];
+          mediaRec.ondataavailable=e=>{if(e.data.size>0) audioChunks.push(e.data);};
+          mediaRec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());clearInterval(recTimer);};
+          mediaRec.start(); recSec=0;
+          recTimer=setInterval(()=>{recSec++;document.getElementById('voiceTimer').textContent=String(Math.floor(recSec/60)).padStart(2,'0')+':'+String(recSec%60).padStart(2,'0');},1000);
+          btn.textContent='⏸ Pause'; sb.style.display='';
+        } catch(e) { showToast('Microphone access denied','error'); }
+      } else if (mediaRec.state==='recording') {
+        mediaRec.pause(); btn.textContent='▶ Resume'; btn.className='rec-btn paused'; clearInterval(recTimer);
+      } else if (mediaRec.state==='paused') {
+        mediaRec.resume(); btn.textContent='⏸ Pause'; btn.className='rec-btn';
+        recTimer=setInterval(()=>{recSec++;document.getElementById('voiceTimer').textContent=String(Math.floor(recSec/60)).padStart(2,'0')+':'+String(recSec%60).padStart(2,'0');},1000);
       }
     }
-
     function stopAndSave() {
-      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-
-      mediaRecorder.stop();
-      document.getElementById('voiceMainBtn').classList.remove('recording');
-
-      setTimeout(() => {
-        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        const ch = bookChapters[currentChapter];
-
-        // Convert to base64 for storage
-        const reader = new FileReader();
-        reader.onload = () => {
-          DB.addVoiceNote(bookId, ch.id, {
-            audioData: reader.result,
-            duration: recordingSeconds,
-            role
-          });
-          loadVoiceNotes();
-          loadComments();
-          showToast('Voice note saved', 'success');
-        };
-        reader.readAsDataURL(blob);
-
-        // Reset UI and close panel
-        document.getElementById('recordBtn').textContent = 'Start Recording';
-        document.getElementById('recordBtn').style.background = '';
-        document.getElementById('recordBtn').style.color = '';
-        document.getElementById('stopBtn').style.display = 'none';
-        document.getElementById('voiceTimer').textContent = '00:00';
-        recordingSeconds = 0;
-
-        // Auto-close voice panel after saving
-        setTimeout(() => closeVoicePanel(), 1500);
-      }, 200);
+      if (!mediaRec || mediaRec.state==='inactive') return;
+      mediaRec.stop();
+      setTimeout(()=>{
+        const blob=new Blob(audioChunks,{type:'audio/webm'}), chId=getCurrentChId();
+        if (!chId || chId==='title') { showToast('Navigate to a chapter first','error'); resetVoiceUI(); return; }
+        const reader=new FileReader();
+        reader.onload=()=>{DB.addVoiceNote(bookId,chId,{audioData:reader.result,duration:recSec,role});loadComments();showToast('Voice note saved','success');};
+        reader.readAsDataURL(blob); resetVoiceUI();
+        setTimeout(()=>{document.getElementById('voiceMiniPanel').style.display='none';},500);
+      },200);
     }
 
-    function loadVoiceNotes() {
-      if (!bookChapters[currentChapter]) return;
-      const ch = bookChapters[currentChapter];
-      const notes = DB.getVoiceNotes(bookId, ch.id);
-      const list = document.getElementById('voiceNotesList');
-
-      list.innerHTML = notes.map(n => `
-        <div class="voice-note-item">
-          <span style="font-size:0.75rem;color:${(n.role === 'reviewer' || n.role === 'CEO') ? 'var(--blue)' : 'var(--gold)'};">
-            ${(n.role === 'reviewer' || n.role === 'CEO') ? '📋 CEO' : '✍️ Emma'}
-          </span>
-          <audio controls src="${n.audioData}" style="flex:1;height:32px;"></audio>
-          <span style="font-size:0.7rem;color:var(--gray-500);">${Math.floor(n.duration / 60)}:${String(n.duration % 60).padStart(2, '0')}</span>
-        </div>
-      `).join('');
+    /* ========== STATUS ========== */
+    function changeStatus(s) {
+      DB.updateBookStatus(bookId,s);
+      const sc=s==='in-review'?'review':s, el=document.getElementById('bookStatus');
+      el.textContent=s==='in-review'?'In Review':s.charAt(0).toUpperCase()+s.slice(1);
+      el.className='badge badge-'+sc;
+      showToast('Status updated to '+s,'success');
     }
 
-    // ---- Utilities ----
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
+    /* ========== UTILS ========== */
+    function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+    function formatDate(iso){if(!iso)return '';const d=new Date(iso);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+    function showToast(msg,type){
+      const c=document.getElementById('toastContainer'),t=document.createElement('div');
+      t.className='toast toast-'+(type||'info');t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),3000);
     }
 
-    function formatDate(iso) {
-      if (!iso) return '';
-      const d = new Date(iso);
-      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast toast-' + type;
-      toast.textContent = msg;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    // ---- Init ----
+    /* ========== INIT ========== */
     loadBook();
-
-    // Real-time synchronization callback
-    DB.onUpdate = (type) => {
-      if (type === 'comments') {
-        if (typeof loadComments === 'function') loadComments();
-        if (typeof renderChapterList === 'function') renderChapterList();
-      } else if (type === 'voicenotes') {
-        if (typeof loadVoiceNotes === 'function') loadVoiceNotes();
-        if (typeof loadComments === 'function') loadComments();
-      } else if (type === 'chapterStatus') {
-        if (typeof renderChapterList === 'function') renderChapterList();
-      } else if (type === 'books') {
-        const books = DB.getBooks();
-        const bookMeta = books.find(b => b.id === bookId);
-        if (bookMeta) {
-          const statusClass = bookMeta.status === 'in-review' ? 'review' : bookMeta.status;
-          const statusEl = document.getElementById('bookStatus');
-          if (statusEl) {
-            statusEl.textContent = bookMeta.status === 'in-review' ? 'In Review' : bookMeta.status.charAt(0).toUpperCase() + bookMeta.status.slice(1);
-            statusEl.className = 'badge badge-' + statusClass;
-          }
-          const selectEl = document.getElementById('statusSelect');
-          if (selectEl) selectEl.value = bookMeta.status;
-        }
-      } else if (type === 'versions') {
-        const modal = document.getElementById('versionModal');
-        if (modal && modal.classList.contains('show') && typeof showVersions === 'function') {
-          showVersions();
+    DB.onUpdate = type => {
+      if (type==='comments'||type==='voicenotes') { if (document.getElementById('commentsDrawer').classList.contains('show')) loadComments(); }
+      else if (type==='books') {
+        const bks=DB.getBooks(), bm=bks.find(b=>b.id===bookId);
+        if (bm) {
+          const sc=bm.status==='in-review'?'review':bm.status, el=document.getElementById('bookStatus');
+          if(el){el.textContent=bm.status==='in-review'?'In Review':bm.status.charAt(0).toUpperCase()+bm.status.slice(1);el.className='badge badge-'+sc;}
+          const sel=document.getElementById('statusSelect'); if(sel) sel.value=bm.status;
         }
       }
     };

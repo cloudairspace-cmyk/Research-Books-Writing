@@ -1,34 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | Homers Research Consult</title>
-  <link rel="stylesheet" href="css/main.css?v=1.3">
+  <title>Dashboard | Homers Research Consult Internal system</title>
+  <link rel="stylesheet" href="css/main.css?v=1.5">
   <style>
     @media (max-width: 768px) {
-      .navbar { padding: 0 12px; height: auto; min-height: 50px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
-      .navbar-brand { gap: 8px; }
-      .navbar-brand h2 { font-size: 0.85rem !important; }
-      .navbar-brand img { width: 30px !important; height: 30px !important; }
-      .navbar-brand span { font-size: 0.65rem !important; }
-      .dashboard { padding: 14px 12px; }
-      .dashboard-header h1 { font-size: 1.2rem; }
-      .stats-row { gap: 8px; }
-      .stat-card { min-width: 100px; padding: 12px 14px; }
-      .stat-card .stat-number { font-size: 1.4rem; }
-      .stat-card .stat-label { font-size: 0.65rem; }
-      .books-grid { grid-template-columns: 1fr; gap: 12px; }
-      .book-card-body { padding: 16px 18px; }
-      .book-card h3 { font-size: 0.95rem; }
+      .navbar {
+        padding: 0 12px;
+        height: auto;
+        min-height: 50px;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      .navbar-brand {
+        gap: 8px;
+      }
+
+      .navbar-brand h2 {
+        font-size: 0.85rem !important;
+      }
+
+      .navbar-brand img {
+        width: 30px !important;
+        height: 30px !important;
+      }
+
+      .navbar-brand span {
+        font-size: 0.65rem !important;
+      }
+
+      .dashboard {
+        padding: 14px 12px;
+      }
+
+      .dashboard-header h1 {
+        font-size: 1.2rem;
+      }
+
+      .stats-row {
+        gap: 8px;
+      }
+
+      .stat-card {
+        min-width: 100px;
+        padding: 12px 14px;
+      }
+
+      .stat-card .stat-number {
+        font-size: 1.4rem;
+      }
+
+      .stat-card .stat-label {
+        font-size: 0.65rem;
+      }
+
+      .books-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .book-card-thumbnail {
+        height: 200px;
+        padding: 16px 20px;
+      }
+
+      .book-card-body {
+        padding: 14px 16px;
+      }
+
+      .book-card h3 {
+        font-size: 0.95rem;
+      }
     }
+
     @media (max-width: 480px) {
-      .navbar-brand h2 { font-size: 0.78rem !important; }
-      .stats-row { flex-direction: row; flex-wrap: wrap; }
-      .stat-card { min-width: 80px; flex: 1 1 45%; }
+      .navbar-brand h2 {
+        font-size: 0.78rem !important;
+      }
+
+      .stats-row {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .stat-card {
+        min-width: 80px;
+        flex: 1 1 45%;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Navbar -->
@@ -79,11 +147,16 @@
 
     <!-- Filter tabs -->
     <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;" class="fade-in fade-in-delay-2">
-      <button class="btn btn-sm filter-btn active" data-filter="all" onclick="filterBooks('all', this)">All Books</button>
-      <button class="btn btn-sm btn-secondary filter-btn" data-filter="draft" onclick="filterBooks('draft', this)">Drafts</button>
-      <button class="btn btn-sm btn-secondary filter-btn" data-filter="in-review" onclick="filterBooks('in-review', this)">In Review</button>
-      <button class="btn btn-sm btn-secondary filter-btn" data-filter="revision" onclick="filterBooks('revision', this)">Revision</button>
-      <button class="btn btn-sm btn-secondary filter-btn" data-filter="approved" onclick="filterBooks('approved', this)">Approved</button>
+      <button class="btn btn-sm filter-btn active" data-filter="all" onclick="filterBooks('all', this)">All
+        Books</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="draft"
+        onclick="filterBooks('draft', this)">Drafts</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="in-review"
+        onclick="filterBooks('in-review', this)">In Review</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="revision"
+        onclick="filterBooks('revision', this)">Revision</button>
+      <button class="btn btn-sm btn-secondary filter-btn" data-filter="approved"
+        onclick="filterBooks('approved', this)">Approved</button>
     </div>
 
     <!-- Books Grid -->
@@ -98,7 +171,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="js/firebase-config.js?v=1.3"></script>
   <script src="js/db.js?v=1.3"></script>
-  <script src="js/books-data.js?v=1.3"></script>
+  <script src="js/books-data.js?v=1.4"></script>
   <script src="js/ceo-feedback-retriever.js?v=1.0"></script>
   <script>
     // ---- Auth Check ----
@@ -118,12 +191,35 @@
       window.location.href = 'index.html';
     }
 
+    // ---- One-time: Clear all previous comments & voice notes ----
+    if (!localStorage.getItem('hrc_comments_cleared_v2')) {
+      DB.clearAllComments();
+      DB.clearAllVoiceNotes();
+      localStorage.setItem('hrc_comments_cleared_v2', 'true');
+      console.log('[HRC] All previous comments and voice notes cleared.');
+    }
+
     // ---- Initialize Books in DB ----
     function initBooks() {
       let stored = DB.getBooks();
       if (!stored || stored.length === 0) {
         DB.setBooks(BOOKS_DATA);
         stored = BOOKS_DATA;
+      } else {
+        // Merge static metadata from BOOKS_DATA into stored books
+        // (covers, pages, chapters etc. may have been added after initial DB save)
+        stored = stored.map(book => {
+          const source = BOOKS_DATA.find(bd => bd.id === book.id);
+          if (source) {
+            book.cover = source.cover;
+            book.pages = source.pages;
+            book.chapters = source.chapters;
+            book.type = source.type;
+            book.description = source.description;
+            book.title = source.title;
+          }
+          return book;
+        });
       }
       return stored;
     }
@@ -148,6 +244,9 @@
         const statusLabel = book.status === 'in-review' ? 'In Review' : book.status.charAt(0).toUpperCase() + book.status.slice(1);
         const updated = book.lastUpdated ? new Date(book.lastUpdated).toLocaleDateString() : 'Not started';
         const cardType = book.type.toLowerCase().includes('business') ? 'business' : 'academic';
+        const bookDataEntry = BOOKS_DATA.find(bd => bd.id === book.id);
+        const coverSrc = book.cover || (bookDataEntry ? bookDataEntry.cover : '') || '';
+        const pageCount = book.pages || (bookDataEntry ? bookDataEntry.pages : null) || '-';
 
         const card = document.createElement('div');
         card.className = `book-card fade-in`;
@@ -155,20 +254,31 @@
         card.style.animationDelay = `${i * 0.06}s`;
         card.onclick = () => window.location.href = `reader.html?book=${book.id}`;
 
+        // Escape title for safe use inside onerror attribute
+        const safeTitle = book.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
         card.innerHTML = `
           <div class="book-card-accent"></div>
-          <div class="book-card-body">
-            <div class="book-number">${String(book.number).padStart(2, '0')}</div>
-            <div class="book-type">${book.type}</div>
-            <h3>${book.title}</h3>
-            <p class="book-desc">${book.description}</p>
-            <div class="book-meta">
-              <span class="badge badge-${statusClass}">${statusLabel}</span>
-              <span class="chapter-count">${book.chapters} chapters</span>
+          <div class="book-card-layout">
+            <div class="book-card-thumbnail">
+              <img src="${coverSrc}" alt="${book.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling&&this.nextElementSibling.remove();this.parentNode.querySelector('.book-thumb-title')&&this.parentNode.querySelector('.book-thumb-title').remove();this.parentNode.querySelector('.book-thumb-pages')&&this.parentNode.querySelector('.book-thumb-pages').remove();this.parentNode.insertAdjacentHTML('beforeend','<div class=\\'book-thumb-fallback\\'><span>${String(book.number).padStart(2, '0')}</span><div class=\\'fallback-title\\'>${safeTitle}</div></div>');">
+
+
             </div>
-            ${openComments > 0 ? `<div style="margin-top:12px;font-size:0.8rem;color:var(--orange);">💬 ${openComments} open comment${openComments > 1 ? 's' : ''}</div>` : ''}
-            <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
-            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Updated: ${updated}</div>
+            <div class="book-card-body">
+              <div class="book-number">${String(book.number).padStart(2, '0')}</div>
+              <div class="book-type">${book.type}</div>
+              <h3>${book.title}</h3>
+              <p class="book-desc">${book.description}</p>
+              <div class="book-meta">
+                <span class="badge badge-${statusClass}">${statusLabel}</span>
+                <span class="chapter-count">📚 ${book.chapters} chapters</span>
+
+              </div>
+              ${openComments > 0 ? `<div style="margin-top:10px;font-size:0.8rem;color:var(--orange);">💬 ${openComments} open comment${openComments > 1 ? 's' : ''}</div>` : ''}
+              <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Updated: ${updated}</div>
+            </div>
           </div>
         `;
         grid.appendChild(card);
@@ -211,4 +321,5 @@
     };
   </script>
 </body>
+
 </html>
