@@ -59,7 +59,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'How to Search, Synthesise, and Write a Review That Stands on Its Own — the most misunderstood part of research, mastered.',
     chapters: 23,
-    pages: 235,
+    pages: 230,
     cover: 'img/book-05-cover.png',
     status: 'draft',
     lastUpdated: null
@@ -71,7 +71,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'Producing Clear, Credible, and Compelling Research Writing — not what to research, but how to write about it.',
     chapters: 24,
-    pages: 250,
+    pages: 210,
     cover: 'img/book-06-cover.png',
     status: 'draft',
     lastUpdated: null
