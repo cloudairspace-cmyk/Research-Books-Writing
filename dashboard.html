@@ -220,6 +220,13 @@
           }
           return book;
         });
+        // Append any newly added books from BOOKS_DATA
+        BOOKS_DATA.forEach(bd => {
+          if (!stored.some(b => b.id === bd.id)) {
+            stored.push(bd);
+          }
+        });
+        DB.setBooks(stored);
       }
       return stored;
     }

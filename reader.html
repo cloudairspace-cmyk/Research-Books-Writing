@@ -553,7 +553,7 @@
       const bd = BOOKS_DATA.find(x => x.id === bookId) || {};
       allPages.unshift({
         elements:['<div class="book-title-page">' +
-          '<div class="title-page-cat">' + (bd.type||'Academic Research').toUpperCase() + ' - BOOK ' + (bd.number||'') + ' OF 10</div>' +
+          '<div class="title-page-cat">' + (bd.type||'Academic Research').toUpperCase() + ' - BOOK ' + (bd.number||'') + ' OF ' + (BOOKS_DATA.length || 21) + '</div>' +
           '<div class="title-page-title">' + (bookMeta.title||'Untitled') + '</div>' +
           '<div class="title-page-subtitle">' + (bookMeta.subtitle||bookMeta.description||'') + '</div>' +
           '<div class="title-page-rule"></div>' +

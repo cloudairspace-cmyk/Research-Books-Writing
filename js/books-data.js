@@ -123,5 +123,77 @@ const BOOKS_DATA = [
     cover: 'img/book-10-cover.png',
     status: 'draft',
     lastUpdated: null
+  },
+  {
+    id: 'book-11',
+    number: 11,
+    title: 'Qualitative Research Unlocked',
+    type: 'Academic Research',
+    description: 'A Practical Guide to Interviews, Focus Groups, and Thematic Analysis — mastering non-numerical inquiry.',
+    chapters: 25,
+    pages: 230,
+    cover: 'img/book-11-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-10-29'
+  },
+  {
+    id: 'book-12',
+    number: 12,
+    title: 'The Survey Builder',
+    type: 'Academic Research',
+    description: 'Designing, Validating, and Administering Questionnaires That Yield Real Data — the definitive survey guide.',
+    chapters: 25,
+    pages: 230,
+    cover: 'img/book-12-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-10-29'
+  },
+  {
+    id: 'book-13',
+    number: 13,
+    title: 'Statistics Without Fear',
+    type: 'Academic Research',
+    description: 'A Step-by-Step Guide to Choosing, Running, and Interpreting Quantitative Tests — demystifying statistical analysis.',
+    chapters: 25,
+    pages: 230,
+    cover: 'img/book-13-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-10-29'
+  },
+  {
+    id: 'book-14',
+    number: 14,
+    title: 'Mixed Methods Made Simple',
+    type: 'Academic Research',
+    description: 'How to Combine Numbers and Narratives in One Strong Study — integrating quantitative and qualitative paradigms.',
+    chapters: 25,
+    pages: 220,
+    cover: 'img/book-14-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-10-29'
+  },
+  {
+    id: 'book-15',
+    number: 15,
+    title: 'Referencing and Academic Integrity',
+    type: 'Academic Research',
+    description: 'Citing Correctly, Avoiding Plagiarism, and Managing Your Sources — mastering APA, Harvard, Chicago, and ethics.',
+    chapters: 25,
+    pages: 220,
+    cover: 'img/book-15-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-10-29'
+  },
+  {
+    id: 'book-16',
+    number: 16,
+    title: 'Publish or Perish No More',
+    type: 'Academic Research',
+    description: 'How to Turn Your Research into Journal Articles That Get Accepted — navigating peer review, rejection, and high-impact publishing.',
+    chapters: 25,
+    pages: 230,
+    cover: 'img/book-16-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-10-31'
   }
 ];
