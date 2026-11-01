@@ -195,5 +195,65 @@ const BOOKS_DATA = [
     cover: 'img/book-16-cover.png',
     status: 'draft',
     lastUpdated: '2026-10-31'
+  },
+  {
+    id: 'book-17',
+    number: 17,
+    title: 'Market Research Essentials',
+    type: 'Business Research',
+    description: 'How to Understand Customers, Competitors, and Demand with Data — customer segmentation, conjoint analysis, pricing research, and market sizing.',
+    chapters: 25,
+    pages: 245,
+    cover: 'img/book-17-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-11-01'
+  },
+  {
+    id: 'book-18',
+    number: 18,
+    title: 'Evidence-Based Decision Making',
+    type: 'Business Research',
+    description: 'Using Research and Data to Make Smarter Business Choices — overcoming intuition biases, A/B testing, decision trees, and management science.',
+    chapters: 25,
+    pages: 268,
+    cover: 'img/book-18-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-11-01'
+  },
+  {
+    id: 'book-19',
+    number: 19,
+    title: 'Research Project Management',
+    type: 'Business Research',
+    description: 'Planning, Budgeting, and Delivering Studies on Time — WBS schedules, Critical Path method, Earned Value tracking, and fieldwork logistics.',
+    chapters: 25,
+    pages: 243,
+    cover: 'img/book-19-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-11-01'
+  },
+  {
+    id: 'book-20',
+    number: 20,
+    title: 'The Research Presenter',
+    type: 'Business Research',
+    description: 'Conference Talks, Posters, and Slide Decks That Hold an Audience — Assertion-Evidence design, vocal dynamics, #BetterPoster, and Q&A defense.',
+    chapters: 25,
+    pages: 291,
+    cover: 'img/book-20-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-11-01'
+  },
+  {
+    id: 'book-21',
+    number: 21,
+    title: 'Grant Sourcing and Proposal Writing',
+    type: 'Business Research',
+    description: 'How to Find the Right Funders and Write Applications That Win — Specific Aims engineering, budget justifications, Red Team reviews, and NIH/NSF success.',
+    chapters: 25,
+    pages: 291,
+    cover: 'img/book-21-cover.png',
+    status: 'draft',
+    lastUpdated: '2026-11-01'
   }
 ];
