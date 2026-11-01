@@ -131,7 +131,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'A Practical Guide to Interviews, Focus Groups, and Thematic Analysis — mastering non-numerical inquiry.',
     chapters: 25,
-    pages: 246,
+    pages: 268,
     cover: 'img/book-11-cover.png',
     status: 'draft',
     lastUpdated: '2026-10-31'
@@ -143,7 +143,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'Designing, Validating, and Administering Questionnaires That Yield Real Data — the definitive survey guide.',
     chapters: 25,
-    pages: 216,
+    pages: 236,
     cover: 'img/book-12-cover.png',
     status: 'draft',
     lastUpdated: '2026-10-31'
@@ -155,7 +155,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'A Step-by-Step Guide to Choosing, Running, and Interpreting Quantitative Tests — demystifying statistical analysis.',
     chapters: 25,
-    pages: 231,
+    pages: 252,
     cover: 'img/book-13-cover.png',
     status: 'draft',
     lastUpdated: '2026-10-31'
@@ -167,7 +167,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'How to Combine Numbers and Narratives in One Strong Study — integrating quantitative and qualitative paradigms.',
     chapters: 25,
-    pages: 225,
+    pages: 246,
     cover: 'img/book-14-cover.png',
     status: 'draft',
     lastUpdated: '2026-10-31'
@@ -179,7 +179,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'Citing Correctly, Avoiding Plagiarism, and Managing Your Sources — mastering APA, Harvard, Chicago, and ethics.',
     chapters: 25,
-    pages: 238,
+    pages: 255,
     cover: 'img/book-15-cover.png',
     status: 'draft',
     lastUpdated: '2026-10-31'
@@ -191,7 +191,7 @@ const BOOKS_DATA = [
     type: 'Academic Research',
     description: 'How to Turn Your Research into Journal Articles That Get Accepted — navigating peer review, rejection, and high-impact publishing.',
     chapters: 25,
-    pages: 246,
+    pages: 271,
     cover: 'img/book-16-cover.png',
     status: 'draft',
     lastUpdated: '2026-10-31'
